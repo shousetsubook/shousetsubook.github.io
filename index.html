@@ -20,7 +20,11 @@
     @dragleage.stop.prevent="onFileDragleave"
     @drop.stop.prevent="onFileDrop"
     >
-    {{ displayText }} 
+    {{ isLoaded ? '' : 'Drag and drop aozora bunko file here'}}
+        <div class="book-panel" v-if="isLoaded">
+            <p v-for="line in bookLines">{{ line }}</p>
+        </div>
+
     </div>
 </div>
 
@@ -31,13 +35,16 @@
             message: 'welcome to 小説ブック',
             isDraggingFile: false,
             encoding: 'shift-jis',
+            isLoaded: false,
             bookBytes: new ArrayBuffer(),
+            titleLines: [],
+            infoLines: [],
             bookLines: [],
             character: 0,
         },
         computed: {
             displayText: function() {
-                    return this.bookLines[0] || 'Drag and drop aozora bunko file here';
+                    return this.bookLines[0];
             }
         },
         methods: {
@@ -45,6 +52,7 @@
                 decoder = new TextDecoder(this.encoding, {fatal:true})
                 temp = decoder.decode(bytes);
                 this.bookLines = temp.split(/\r?\n/)
+                this.isLoaded = true
             },
             onFileDragover: function(e) {
                 this.isDraggingFile = true;
