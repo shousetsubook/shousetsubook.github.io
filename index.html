@@ -20,7 +20,7 @@
     @dragleage.stop.prevent="onFileDragleave"
     @drop.stop.prevent="onFileDrop"
     >
-    {{ message }} 
+    {{ displayText }} 
     </div>
 </div>
 
@@ -33,14 +33,12 @@
             encoding: 'shift-jis',
             bookBytes: new ArrayBuffer(),
             bookLines: [],
+            character: 0,
         },
         computed: {
-            /*
             displayText: function() {
-                    console.log("triggerd'")
                     return this.bookLines[0] || 'Drag and drop aozora bunko file here';
             }
-            */
         },
         methods: {
             loadFile: function(bytes) {
