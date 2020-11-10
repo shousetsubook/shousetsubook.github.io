@@ -10,6 +10,11 @@
         .drop-wrapper {
             background-color:aquamarine;
         }
+        .book-panel {
+            -ms-writing-mode: tb-rl;
+            writing-mode: vertical-rl;
+            text-orientation: upright;
+        }
     </style>
 </head>
 <body>
@@ -20,11 +25,10 @@
     @dragleage.stop.prevent="onFileDragleave"
     @drop.stop.prevent="onFileDrop"
     >
-    {{ isLoaded ? '' : 'Drag and drop aozora bunko file here'}}
-        <div class="book-panel" v-if="isLoaded">
-            <p v-for="line in bookLines">{{ line }}</p>
+    {{ isLoaded ? '' : 'Drag and drop aozora bunko file'}}
+        <div class="book-panel" v-if="isLoaded" >
+            <p v-for="line in 30" v-html="bookLines[line]">{{ bookLines[line] }}</p>
         </div>
-
     </div>
 </div>
 
@@ -41,17 +45,32 @@
             infoLines: [],
             bookLines: [],
             character: 0,
+            kana: /[\|\u3040-\u309f\u30a0-\u30ff\uff00-\uff9f]/,
+            kanji: /[\u4e00-\u9faf\u3400-\u4dbf]/,
         },
-        computed: {
-            displayText: function() {
-                    return this.bookLines[0];
+        computed:{
+            test: function() {
+                text = "吾輩《わがはい》は猫である。名前はまだ無い。"
+                furigana = /[\|\u3040-\u309f\u30a0-\u30ff\uff00-\uff9f]?([\u4e00-\u9faf\u3400-\u4dbf]+?)《(.+?)》/g
+                return text.replace(furigana, '<ruby>$1<rt>$2</rt></ruby>')
             }
         },
         methods: {
+            rubify: function(text) {
+                // match will give you all results
+                // exec needs to be looped through
+                // will need to replace things in the end
+                furigana = /[\|\u3040-\u309f\u30a0-\u30ff\uff00-\uff9f]?([\u4e00-\u9faf\u3400-\u4dbf]+?)《(.+?)》/g
+                return text.replace(furigana, '<ruby>$1<rt>$2</rt></ruby>')
+
+            },
             loadFile: function(bytes) {
                 decoder = new TextDecoder(this.encoding, {fatal:true})
                 temp = decoder.decode(bytes);
                 this.bookLines = temp.split(/\r?\n/)
+                for (var i = 0; i < this.bookLines.length; i++) {
+                    this.bookLines[i] = this.rubify(this.bookLines[i])
+                }
                 this.isLoaded = true
             },
             onFileDragover: function(e) {
