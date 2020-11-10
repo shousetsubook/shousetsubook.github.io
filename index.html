@@ -32,31 +32,14 @@
             isDraggingFile: false,
             encoding: 'shift-jis',
             bookBytes: new ArrayBuffer(),
+            bookLines: [],
         },
         computed: {
             bookText: function() {
                 decoder = new TextDecoder(this.encoding, {fatal:true})
-                decoder.decode(this.bookBytes.slice(start,i+j));
-                /*
-                bookChunks = [];
-                decoder = new TextDecoder(this.encoding, {fatal:true})
-                start = 0
-                // for large files, the decoder uses too much memory for some reason, so decode in chunks
-                for (let i = 0; i < this.bookBytes.byteLength; i+=1000) {
-                    // some characters span multiple bytes. 
-                    // so just try the next few bytes until it works
-                    for (let j = 0; j < 10; j++) {
-                        try {
-                            bookChunks.push(decoder.decode(this.bookBytes.slice(start,i+j)));
-                            start = i+j;
-                            break;
-                        } catch {
-
-                        }
-                    }
-                }
-                return bookChunks.join('')
-                */
+                temp = decoder.decode(this.bookBytes);
+                console.log("something happne")
+                return temp.slice(0,4000)
             },
             displayText: function() {
                     return this.bookText || 'Drag and drop aozora bunko file here';
