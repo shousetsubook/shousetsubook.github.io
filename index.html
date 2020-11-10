@@ -20,7 +20,7 @@
     @dragleage.stop.prevent="onFileDragleave"
     @drop.stop.prevent="onFileDrop"
     >
-    {{ displayText }} 
+    {{ message }} 
     </div>
 </div>
 
@@ -35,17 +35,19 @@
             bookLines: [],
         },
         computed: {
-            bookText: function() {
-                decoder = new TextDecoder(this.encoding, {fatal:true})
-                temp = decoder.decode(this.bookBytes);
-                console.log("something happne")
-                return temp.slice(0,4000)
-            },
+            /*
             displayText: function() {
-                    return this.bookText || 'Drag and drop aozora bunko file here';
+                    console.log("triggerd'")
+                    return this.bookLines[0] || 'Drag and drop aozora bunko file here';
             }
+            */
         },
         methods: {
+            loadFile: function(bytes) {
+                decoder = new TextDecoder(this.encoding, {fatal:true})
+                temp = decoder.decode(bytes);
+                this.bookLines = temp.split(/\r?\n/)
+            },
             onFileDragover: function(e) {
                 this.isDraggingFile = true;
             },
@@ -55,13 +57,13 @@
             onFileDrop: function(e) {
                 this.isDraggingFile = false;
                 for (var i = 0; i < e.dataTransfer.files.length; i++) {
-                var file = e.dataTransfer.files[i];
-                reader = new FileReader();
-                reader.readAsArrayBuffer(file);
-                var self = this;
-                reader.onload = function (e) {
-                    self.bookBytes = reader.result
-                }
+                    var file = e.dataTransfer.files[i];
+                    reader = new FileReader();
+                    reader.readAsArrayBuffer(file);
+                    var self = this;
+                    reader.onload = function (e) {
+                        self.loadFile(reader.result)
+                    }
                 }
             },
         },
