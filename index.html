@@ -20,7 +20,7 @@
         }
 
         .drop-wrapper {
-            background-color:aquamarine;
+            background-color:rgb(241, 237, 212);
         }
         .book-panel {
             -ms-writing-mode: tb-rl;
@@ -64,7 +64,7 @@
             encoding: 'shift-jis',
             isLoaded: false,
             position: {line: 0, char: 0},
-            maxLines: 45,
+            maxLines: 40,
             maxHeight: 30,
             isRuby: true,
             bookBytes: new ArrayBuffer(),
@@ -79,6 +79,7 @@
                 lines = [];
                 overflow = false
                 index = this.position.line
+                displayLength = 0
                 while (!overflow) {
                     line = this.bookLines[index]
                     // remove furigana/formatting
@@ -86,17 +87,16 @@
                     cleaned = cleaned.replace(/［.*］/g, "")
                     // calculate space for a single line
                     numLines = cleaned.length / this.maxHeight + 1
+                    numLinesMod = cleaned.length % this.maxHeight
                     // determine if we can add it to displayLines
-                    if (numLines >= this.maxLines) {
+                    if (displayLength + numLines >= this.maxLines) {
+                        truncate = numLines - (this.maxLines - displayLength)
+                        line = line.slice(0, -(numLinesMod + truncate * this.maxHeight))
                         overflow = true
-                    }
-                    // truncate line
-                    lines.push(line)
-
-                }
-                lines = this.bookLines
-                for (var i = 0; i < lines.length; i++) {
-                    lines[i] = this.rubify(lines[i])
+                    } 
+                    lines.push(this.rubify(line))
+                    displayLength += numLines
+                    index++;
                 }
                 return lines
             },
