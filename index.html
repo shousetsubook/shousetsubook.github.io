@@ -7,27 +7,50 @@
     <!-- development version, includes helpful console warnings -->
     <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
     <style>
+        html,
+        body,
+        #app,
+        .drop-wrapper,
+        .app-container {
+            height: 100%;
+            width: 100%;
+            padding: 0;
+            margin: 0;
+            overflow-y: hidden;
+        }
+
         .drop-wrapper {
             background-color:aquamarine;
         }
         .book-panel {
             -ms-writing-mode: tb-rl;
+            padding: 5%;
+            margin: 5%;
             writing-mode: vertical-rl;
             text-orientation: upright;
+        }
+        .overflow {
+            text-overflow:clip;
+            white-space:nowrap;
+        }
+
+        [v-cloak] {
+            display: none;
         }
     </style>
 </head>
 <body>
 <div id="app">
-    {{ encoding }}
     <div class="drop-wrapper"
     @dragover.stop.prevent="onFileDragover"
     @dragleage.stop.prevent="onFileDragleave"
     @drop.stop.prevent="onFileDrop"
     >
-    {{ isLoaded ? '' : 'Drag and drop aozora bunko file'}}
-        <div class="book-panel" v-if="isLoaded" >
-            <p v-for="line in 25" v-html="displayLines[line]">{{ displayLines[line] }}</p>
+    <div class="app-container">
+        {{ isLoaded ? '' : 'Drag and drop aozora bunko file'}}
+            <div class="book-panel" v-if="isLoaded" >
+                <p v-for="line in displayLines" v-html="line">{{ line }}</p>
+            </div>
         </div>
     </div>
 </div>
@@ -40,6 +63,9 @@
             isDraggingFile: false,
             encoding: 'shift-jis',
             isLoaded: false,
+            position: {line: 0, char: 0},
+            maxLines: 45,
+            maxHeight: 30,
             isRuby: true,
             bookBytes: new ArrayBuffer(),
             bookLines: [],
@@ -47,13 +73,30 @@
             infoLines: [],
             character: 0,
         },
-        computed:{
+        computed: {
+            title: function() { return this.bookLines[0] || '' },
             displayLines: function() {
-                lines = this.bookLines
-                if (this.isRuby) {
-                    for (var i = 0; i < lines.length; i++) {
-                        lines[i] = this.rubify(lines[i])
+                lines = [];
+                overflow = false
+                index = this.position.line
+                while (!overflow) {
+                    line = this.bookLines[index]
+                    // remove furigana/formatting
+                    cleaned = line.replace(/｜?([\u4e00-\u9faf\u3400-\u4dbf]+?)《.*》/g, "$1");
+                    cleaned = cleaned.replace(/［.*］/g, "")
+                    // calculate space for a single line
+                    numLines = cleaned.length / this.maxHeight + 1
+                    // determine if we can add it to displayLines
+                    if (numLines >= this.maxLines) {
+                        overflow = true
                     }
+                    // truncate line
+                    lines.push(line)
+
+                }
+                lines = this.bookLines
+                for (var i = 0; i < lines.length; i++) {
+                    lines[i] = this.rubify(lines[i])
                 }
                 return lines
             },
@@ -66,10 +109,9 @@
                 furigana = /｜?([\u4e00-\u9faf\u3400-\u4dbf]+?)《(.+?)》/g;
                 return text.replace(furigana, '<ruby>$1<rt>$2</rt></ruby>');
             },
-            loadFile: function(bytes) {
+            loadFile: function() {
                 decoder = new TextDecoder(this.encoding, {fatal:true})
-                temp = decoder.decode(bytes);
-                this.bookLines = temp.split(/\r?\n/)
+                this.bookLines = decoder.decode(this.bookBytes).split(/\r?\n/)
                 this.isLoaded = true
             },
             onFileDragover: function(e) {
@@ -86,7 +128,8 @@
                     reader.readAsArrayBuffer(file);
                     var self = this;
                     reader.onload = function (e) {
-                        self.loadFile(reader.result)
+                        self.bookBytes = reader.result
+                        self.loadFile()
                     }
                 }
             },
