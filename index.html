@@ -19,6 +19,15 @@
             overflow-y: hidden;
         }
 
+        .first-line {
+            position: absolute;
+            padding-right:inherit;
+            padding-top:inherit;
+            right:0;
+            top:0;
+        
+        }
+
         .drop-wrapper {
             background-color:rgb(241, 237, 212);
         }
@@ -49,7 +58,13 @@
     <div class="app-container">
         {{ isLoaded ? '' : 'Drag and drop aozora bunko file'}}
             <div class="book-panel" v-if="isLoaded" >
-                <p v-for="line in displayLines" v-html="line">{{ line }}</p>
+                <p
+                    v-for="(line, index) in displayLines"
+                    :class="{ 'first-line' : index === 0 }"
+                    v-html="line"
+                >
+                    {{ line }}
+                </p>
             </div>
         </div>
     </div>
