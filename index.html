@@ -28,6 +28,7 @@
             padding: 5em;
             writing-mode: vertical-rl;
             text-orientation: upright;
+            font-size:18px;
         }
         .overflow {
             text-overflow:clip;
@@ -66,13 +67,11 @@
     var app = new Vue({
         el: '#app',
         data: {
+            hash: location.hash,
             message: 'welcome to 小説ブック',
             isDraggingFile: false,
             encoding: 'shift-jis',
             isLoaded: false,
-            position: {line: 0, char: 0},
-            maxLines: 200,
-            maxHeight: 30,
             isRuby: true,
             bookBytes: new ArrayBuffer(),
             bookLines: [],
@@ -87,28 +86,11 @@
                 if (this.bookLines.length == 0) {
                     return []
                 }
-                overflow = false
-                index = this.position.line
-                displayLength = 0
-                while (!overflow) {
-                    line = this.bookLines[index]
-                    // remove furigana/formatting
-                    cleaned = line.replace(/｜?([\u4e00-\u9faf\u3400-\u4dbf]+?)《.*》/g, "$1");
-                    cleaned = cleaned.replace(/［.*］/g, "")
-                    // calculate space for a single line
-                    numLines = cleaned.length / this.maxHeight + 1
-                    numLinesMod = cleaned.length % this.maxHeight
-                    // determine if we can add it to displayLines
-                    if (displayLength + numLines >= this.maxLines) {
-                        truncate = numLines - (this.maxLines - displayLength)
-                        line = line.slice(0, -(numLinesMod + truncate * this.maxHeight))
-                        overflow = true
-                    } 
-                    lines.push(this.rubify(line))
-                    displayLength += numLines
-                    index++;
+                for (var i = 0; i < this.bookLines.length; i++) {
+                    lines.push(this.rubify(this.bookLines[i]))
                 }
                 this.$nextTick(function() {
+                    location.hash = ''
                     location.hash = 'paragraph-0'
                 })
                 return lines
