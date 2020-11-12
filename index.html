@@ -16,16 +16,24 @@
             width: 100%;
             padding: 0;
             margin: 0;
+            position:absolute;
             overflow-y: hidden;
         }
 
+        .paragraph {
+            text-align:justify;
+            word-wrap:break-word;
+            max-height:90%;
+        }
 
         .drop-wrapper {
             background-color:rgb(241, 237, 212);
         }
         .book-panel {
             -ms-writing-mode: tb-rl;
-            padding: 5em;
+            margin:2.5em;
+            padding:2.5em;
+            
             writing-mode: vertical-rl;
             text-orientation: upright;
             font-size:18px;
@@ -48,7 +56,7 @@
     @drop.stop.prevent="onFileDrop"
     >
     <div class="app-container">
-        {{ isLoaded ? '' : 'Drag and drop aozora bunko file'}}
+        {{ isLoaded ? null : 'Drag and drop aozora bunko file'}}
             <div class="book-panel" v-if="isLoaded" >
                 <div
                     class="paragraph"
