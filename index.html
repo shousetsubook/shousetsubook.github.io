@@ -19,22 +19,13 @@
             overflow-y: hidden;
         }
 
-        .first-line {
-            position: absolute;
-            padding-right:inherit;
-            padding-top:inherit;
-            right:0;
-            top:0;
-        
-        }
 
         .drop-wrapper {
             background-color:rgb(241, 237, 212);
         }
         .book-panel {
             -ms-writing-mode: tb-rl;
-            padding: 5%;
-            margin: 5%;
+            padding: 5em;
             writing-mode: vertical-rl;
             text-orientation: upright;
         }
@@ -58,13 +49,14 @@
     <div class="app-container">
         {{ isLoaded ? '' : 'Drag and drop aozora bunko file'}}
             <div class="book-panel" v-if="isLoaded" >
-                <p
+                <div
+                    class="paragraph"
                     v-for="(line, index) in displayLines"
-                    :class="{ 'first-line' : index === 0 }"
+                    v-bind:id="'paragraph-'+index"
                     v-html="line"
                 >
                     {{ line }}
-                </p>
+            </div>
             </div>
         </div>
     </div>
@@ -79,7 +71,7 @@
             encoding: 'shift-jis',
             isLoaded: false,
             position: {line: 0, char: 0},
-            maxLines: 40,
+            maxLines: 200,
             maxHeight: 30,
             isRuby: true,
             bookBytes: new ArrayBuffer(),
@@ -92,6 +84,9 @@
             title: function() { return this.bookLines[0] || '' },
             displayLines: function() {
                 lines = [];
+                if (this.bookLines.length == 0) {
+                    return []
+                }
                 overflow = false
                 index = this.position.line
                 displayLength = 0
@@ -113,6 +108,9 @@
                     displayLength += numLines
                     index++;
                 }
+                this.$nextTick(function() {
+                    location.hash = 'paragraph-0'
+                })
                 return lines
             },
         },
