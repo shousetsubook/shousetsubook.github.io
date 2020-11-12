@@ -1,4 +1,4 @@
-# shousetsu-book
+# shousetsubook.github.io
 https://shousetsubook.github.io/
 
 Online E-Reader for Aozora Bunko texts
