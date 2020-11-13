@@ -106,8 +106,18 @@
                     lines.push(this.rubify(this.bookLines[i]))
                 }
                 this.$nextTick(function() {
+<<<<<<< HEAD
                     location.hash = ''
                     location.hash = 'bookmark'
+=======
+                    if (location.hash == '') {
+                        location.hash = 'paragraph-0'
+                    } else {
+                        temp = location.hash
+                        location.hash = ''
+                        location.hash = temp
+                    }
+>>>>>>> master
                 })
                 return lines
             },
