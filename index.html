@@ -99,8 +99,13 @@
                     lines.push(this.rubify(this.bookLines[i]))
                 }
                 this.$nextTick(function() {
-                    location.hash = ''
-                    location.hash = 'paragraph-0'
+                    if (location.hash == '') {
+                        location.hash = 'paragraph-0'
+                    } else {
+                        temp = location.hash
+                        location.hash = ''
+                        location.hash = temp
+                    }
                 })
                 return lines
             },
