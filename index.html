@@ -17,7 +17,7 @@
             padding: 0;
             margin: 0;
             position:absolute;
-            overflow-y: hidden;
+            /* overflow-y: hidden; */
         }
 
         .paragraph {
@@ -39,6 +39,13 @@
             text-orientation: upright;
             font-size:18px;
         }
+        .bookmark {
+            width:3px;
+            height:100vh;
+            background-color:maroon;
+            margin-left:100px;
+            position:absolute;
+        }
         .overflow {
             text-overflow:clip;
             white-space:nowrap;
@@ -59,14 +66,14 @@
     <div class="app-container">
         {{ isLoaded ? null : 'Drag and drop aozora bunko file'}}
             <div class="book-panel" v-if="isLoaded" >
+            <div class="bookmark" id="bookmark"></div>
                 <div
                     class="paragraph"
                     v-for="(line, index) in displayLines"
                     v-bind:id="'paragraph-'+index"
                     v-html="line"
                 >
-                    {{ line }}
-            </div>
+                </div>
             </div>
         </div>
     </div>
@@ -100,7 +107,7 @@
                 }
                 this.$nextTick(function() {
                     location.hash = ''
-                    location.hash = 'paragraph-0'
+                    location.hash = 'bookmark'
                 })
                 return lines
             },
