@@ -12,43 +12,40 @@
         #app,
         .drop-wrapper,
         .app-container {
+            background-color:rgb(241, 237, 212);
             height: 100%;
             width: 100%;
             padding: 0;
             margin: 0;
             position:absolute;
-            /* overflow-y: hidden; */
         }
 
         .paragraph {
             text-align:justify;
             word-wrap:break-word;
-            max-height:90%;
         }
 
-        .drop-wrapper {
-            background-color:rgb(241, 237, 212);
-        }
         .book-panel {
             -ms-writing-mode: tb-rl;
             writing-mode: tb-rl;
-            margin:2.5em;
-            padding:2.5em;
-            
             writing-mode: vertical-rl;
             text-orientation: upright;
             font-size:18px;
+            height: 80vh;
+        }
+        .book-wrapper {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+            position:absolute;
         }
         .bookmark {
+            top:40px;
             width:3px;
             height:100vh;
             background-color:maroon;
-            margin-left:100px;
             position:absolute;
-        }
-        .overflow {
-            text-overflow:clip;
-            white-space:nowrap;
         }
 
         [v-cloak] {
@@ -63,16 +60,17 @@
     @dragleage.stop.prevent="onFileDragleave"
     @drop.stop.prevent="onFileDrop"
     >
-    <div class="app-container">
-        {{ isLoaded ? null : 'Drag and drop aozora bunko file'}}
-            <div class="book-panel" v-if="isLoaded" >
-            <div class="bookmark" id="bookmark"></div>
-                <div
-                    class="paragraph"
-                    v-for="(line, index) in displayLines"
-                    v-bind:id="'paragraph-'+index"
-                    v-html="line"
-                >
+        <div class="app-container">
+            {{ isLoaded ? null : 'Drag and drop aozora bunko file'}}
+            <div class="book-wrapper" v-if="isLoaded">
+                <div class="book-panel" >
+                    <div
+                        class="paragraph"
+                        v-for="(line, index) in displayLines"
+                        v-bind:id="'paragraph-'+index"
+                        v-html="line"
+                    >
+                    </div>
                 </div>
             </div>
         </div>
@@ -95,6 +93,20 @@
             infoLines: [],
             character: 0,
         },
+        created: function() {
+            var self = this;
+            window.addEventListener('keydown', function(e) {
+                var stopEvent = function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+                switch (e.key) {
+                    case ' ':
+                    stopEvent(e);
+                    self.bookmark()
+                }
+            })
+        },
         computed: {
             title: function() { return this.bookLines[0] || '' },
             displayLines: function() {
@@ -106,10 +118,6 @@
                     lines.push(this.rubify(this.bookLines[i]))
                 }
                 this.$nextTick(function() {
-<<<<<<< HEAD
-                    location.hash = ''
-                    location.hash = 'bookmark'
-=======
                     if (location.hash == '') {
                         location.hash = 'paragraph-0'
                     } else {
@@ -117,12 +125,13 @@
                         location.hash = ''
                         location.hash = temp
                     }
->>>>>>> master
                 })
                 return lines
             },
         },
         methods: {
+            bookmark: function() {
+            },
             rubify: function(text) {
                 // hiragana katakana fw-roman hw-katakana unicodes:
                 // \u3040-\u309f\u30a0-\u30ff\uff00-\uff9f
