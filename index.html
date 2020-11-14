@@ -68,8 +68,8 @@
         <div class="app-container">
             {{ isLoaded ? null : 'Drag and drop aozora bunko file'}}
             <div class="book-wrapper" v-if="isLoaded">
-                <div class="book-panel" >
-                    <div class="bookmark" v-bind:style="bookmarkPos" v-bind:id="'bookmark-'+position" v-if="isLoaded"></div>
+                <div class="book-panel">
+                    <div class="bookmark" v-bind:style="bookmarkPos" v-bind:id="'bookmark-'+position"></div>
                     <div
                         class="paragraph"
                         v-for="(line, index) in displayLines"
@@ -102,23 +102,16 @@
         },
         created: function() {
             var self = this;
-            this.position = parseInt(location.hash.match(/\d+/)[0])
+            this.position = parseInt(/\d+/.exec(location.hash) || 0)
             window.addEventListener('click', function(e) {
-                if (e.shiftKey) {
+                if (e.ctrlKey) {
                     self.bookmark(e.pageX)
-                }
-            })
-            window.addEventListener('keydown', function(e) {
-                switch (e.key) {
-                    case ' ':
-                    stopEvent(e);
-                    self.bookmark()
                 }
             })
         },
         computed: {
             bookmarkPos: function() {
-                return {left: this.position}
+                return {left: this.position + 'px'}
             },
             title: function() { return this.bookLines[0] || '' },
             displayLines: function() {
@@ -134,6 +127,7 @@
                     if (location.hash == '') {
                         location.hash = 'paragraph-0'
                     } else {
+                        location.hash = ''
                         location.hash = 'bookmark-' + this.position
                     }
                 })
@@ -143,10 +137,12 @@
         methods: {
             bookmark: function(x) {
                     bookmark = document.getElementsByClassName('bookmark')[0]
+                    newId = 'bookmark-' + x
+                    location.hash = newId
+                    bookmark.id = 'bookmark-' + x
                     left = x
                     bookmark.style.left = x + 'px'
                     position = left
-                    location.hash = newId
             },
             rubify: function(text) {
                 // hiragana katakana fw-roman hw-katakana unicodes:
