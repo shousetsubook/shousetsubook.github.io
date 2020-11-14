@@ -20,6 +20,7 @@ Inspired by https://animebook.github.io
 
 ## Roadmap
 - robust bookmarking at the character level (currently it's at the pixel level which can change based resolution, viewport size, etc.)
+- don't display Aozora Bunko metadata in the book panel (but show it somewhere else somehow)
 - render Aozora Bunko indentation properly
 - themes/fonts
 - toggleable 縦書き or 横書き
