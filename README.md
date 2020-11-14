@@ -9,6 +9,7 @@ Online E-Reader for Aozora Bunko texts.
 - bookmarking*
 - works with Yomichan
 - entire app is a single HTML page which you can save
+
 \*bookmarking is still super basic, see [Usage](#usage)
 
 ## Usage
