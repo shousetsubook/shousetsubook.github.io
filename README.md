@@ -17,7 +17,7 @@ Drag and drop an unzipped Aozora Buko text file to start reading.
 
 Ctrl+click to bookmark at the mouse position. This will add a bookmark position to the URL. When you load the page with the same book next time with the same URL, it should jump to your bookmark.
 
-Inspired by https://animebook.github.io
+
 
 ## Roadmap
 - robust bookmarking at the character level (currently it's at the pixel level which can change based resolution, viewport size, etc.)
@@ -29,3 +29,5 @@ Inspired by https://animebook.github.io
 ### Maybe
 - stateful bookmarking
 - unzip files in browser
+
+Inspired by https://animebook.github.io
