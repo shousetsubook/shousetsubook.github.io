@@ -12,36 +12,45 @@
         #app,
         .drop-wrapper,
         .app-container {
+            background-color:rgb(241, 237, 212);
             height: 100%;
             width: 100%;
             padding: 0;
             margin: 0;
             position:absolute;
-            overflow-y: hidden;
         }
 
         .paragraph {
             text-align:justify;
             word-wrap:break-word;
-            max-height:90%;
-        }
-
-        .drop-wrapper {
             background-color:rgb(241, 237, 212);
         }
+
         .book-panel {
             -ms-writing-mode: tb-rl;
             writing-mode: tb-rl;
-            margin:2.5em;
-            padding:2.5em;
-            
             writing-mode: vertical-rl;
             text-orientation: upright;
             font-size:18px;
+            height: 80vh;
         }
-        .overflow {
-            text-overflow:clip;
-            white-space:nowrap;
+        .book-wrapper {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+            position:absolute;
+        }
+        .bookmark {
+            margin-top:-9vh;
+            color: rgb(255, 255, 255);
+            padding: 1vh;
+            height:7vh;
+            position:absolute;
+            pointer-events: none;
+            font-size:5vh;
+            width: 3px;
+            background-color:rgb(45, 82, 185);
         }
 
         [v-cloak] {
@@ -56,17 +65,19 @@
     @dragleage.stop.prevent="onFileDragleave"
     @drop.stop.prevent="onFileDrop"
     >
-    <div class="app-container">
-        {{ isLoaded ? null : 'Drag and drop aozora bunko file'}}
-            <div class="book-panel" v-if="isLoaded" >
-                <div
-                    class="paragraph"
-                    v-for="(line, index) in displayLines"
-                    v-bind:id="'paragraph-'+index"
-                    v-html="line"
-                >
-                    {{ line }}
-            </div>
+        <div class="app-container">
+            {{ isLoaded ? null : 'Drag and drop aozora bunko file'}}
+            <div class="book-wrapper" v-if="isLoaded">
+                <div class="book-panel">
+                    <div class="bookmark" v-bind:style="bookmarkPos" v-bind:id="'bookmark-'+position"></div>
+                    <div
+                        class="paragraph"
+                        v-for="(line, index) in displayLines"
+                        v-bind:id="'paragraph-'+index"
+                        v-html="line"
+                    >
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -76,10 +87,11 @@
     var app = new Vue({
         el: '#app',
         data: {
-            hash: location.hash,
+            hash: '',
             message: 'welcome to 小説ブック',
             isDraggingFile: false,
             encoding: 'shift-jis',
+            position: 0,
             isLoaded: false,
             isRuby: true,
             bookBytes: new ArrayBuffer(),
@@ -88,9 +100,22 @@
             infoLines: [],
             character: 0,
         },
+        created: function() {
+            var self = this;
+            this.position = parseInt(/\d+/.exec(location.hash) || 0)
+            window.addEventListener('click', function(e) {
+                if (e.ctrlKey) {
+                    self.bookmark(e.pageX)
+                }
+            })
+        },
         computed: {
+            bookmarkPos: function() {
+                return {left: this.position + 'px'}
+            },
             title: function() { return this.bookLines[0] || '' },
             displayLines: function() {
+                var self = this;
                 lines = [];
                 if (this.bookLines.length == 0) {
                     return []
@@ -102,15 +127,23 @@
                     if (location.hash == '') {
                         location.hash = 'paragraph-0'
                     } else {
-                        temp = location.hash
                         location.hash = ''
-                        location.hash = temp
+                        location.hash = 'bookmark-' + this.position
                     }
                 })
                 return lines
             },
         },
         methods: {
+            bookmark: function(x) {
+                    bookmark = document.getElementsByClassName('bookmark')[0]
+                    newId = 'bookmark-' + x
+                    location.hash = newId
+                    bookmark.id = 'bookmark-' + x
+                    left = x
+                    bookmark.style.left = x + 'px'
+                    position = left
+            },
             rubify: function(text) {
                 // hiragana katakana fw-roman hw-katakana unicodes:
                 // \u3040-\u309f\u30a0-\u30ff\uff00-\uff9f
