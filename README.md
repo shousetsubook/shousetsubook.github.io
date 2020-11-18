@@ -20,9 +20,9 @@ Ctrl+click to bookmark at the mouse position. This will add a bookmark position 
 
 
 ## Roadmap
-- robust bookmarking at the character level (currently it's at the pixel level which can change based resolution, viewport size, etc.)
+- robust bookmarking at the character level (currently it's at the pixel level which can change based on resolution, viewport size, etc.)
 - don't display Aozora Bunko metadata in the book panel (but show it somewhere else somehow)
-- render Aozora Bunko indentation properly
+- render all Aozora Bunko formatting properly (indentation, emphasis, titles, etc)
 - themes/fonts
 - toggleable 縦書き or 横書き
 
