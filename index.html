@@ -87,14 +87,13 @@
     var app = new Vue({
         el: '#app',
         data: {
+            bookmarking: false,
             hash: '',
             message: 'welcome to 小説ブック',
             isDraggingFile: false,
             encoding: 'shift-jis',
-            bookmark: {
-                paragraph: 0,
-                character: 0,
-            },
+            paragraph: 46,
+            character: 0,
             isLoaded: false,
             isRuby: true,
             bookBytes: new ArrayBuffer(),
@@ -124,14 +123,18 @@
                     return []
                 }
                 for (var i = 0; i < this.bookLines.length; i++) {
-                    lines.push(this.rubify(this.bookLines[i]))
+                    if (i == this.paragraph) {
+                        lines.push(this.rubify(this.bookLines[i],588))
+                    } else {
+                        lines.push(this.rubify(this.bookLines[i]))
+                    }
                 }
                 this.$nextTick(function() {
                     if (location.hash == '') {
                         location.hash = 'paragraph-0'
                     } else {
                         location.hash = ''
-                        location.hash = 'bookmark-' + this.position
+                        location.hash = 'p-' + this.paragraph + '-c-' + 600
                     }
                 })
                 return lines
@@ -147,12 +150,18 @@
                     bookmark.style.left = x + 'px'
                     position = left
             },
-            rubify: function(text) {
+            rubify: function(text, bookmark=false) {
                 // hiragana katakana fw-roman hw-katakana unicodes:
                 // \u3040-\u309f\u30a0-\u30ff\uff00-\uff9f
                 //｜ is the kanji separator (different from ascii pipe |)
                 furigana = /｜?([\u4e00-\u9faf\u3400-\u4dbf]+?)《(.+?)》/g;
-                return text.replace(furigana, '<ruby>$1<rt>$2</rt></ruby>');
+                if (bookmark) {
+                    text = text.replace(furigana, '<ruby>$1<rt>$2</rt></ruby>');
+                    console.log("bookmarked")
+                    return text.slice(0,bookmark) + '<span id="p-46-c-600">' + text[bookmark] + '</span>' + text.slice(bookmark + 1)
+                } else {
+                    return text.replace(furigana, '<ruby>$1<rt>$2</rt></ruby>');
+                }
             },
             loadFile: function() {
                 decoder = new TextDecoder(this.encoding, {fatal:true})
