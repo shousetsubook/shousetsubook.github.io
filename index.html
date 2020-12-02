@@ -41,7 +41,7 @@
         .sesame-vertical {
             font-style: normal;
             padding: 0 7px;
-            background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACIAAAASCAYAAAA+PQxvAAAATUlEQVRIie3OMQ2AMBAAwEvZGbqyIAgLSKogFJAgAVYMdGJFA9Mn5E/BkVL6pEYHYEQrgYGCBTvOqMSMAzc21CEo0jHhwoon6JFS+pEXFyoIdqccMywAAAAASUVORK5CYII=') repeat-y;
+            background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACIAAAASCAYAAAA+PQxvAAAASklEQVRIie3RMQ2AQBQFwQEBFChAED7OBgYQhAV6HCCE6gRQfUjeKNhkiYj4pwEb9uIOC07cODBXxoxYcaFVhnSTDyzqStdEvPIAUCgF359HwAgAAAAASUVORK5CYII=') repeat-y;
         }
         .book-wrapper {
             display: flex;
@@ -133,21 +133,14 @@
                     return []
                 }
                 for (var i = 0; i < this.bookLines.length; i++) {
-                    if (i == this.paragraph) {
-                        lines.push(this.rubify(this.bookLines[i],588))
-                    } else if (i == 1) {
-                        line = this.rubify(this.bookLines[i])
-                        lines.push('<span class="sesame-vertical">' + line + '</span>')
-                    } else {
-                        lines.push(this.rubify(this.bookLines[i]))
+                    line = this.transform(this.bookLines[i])
+                    if (line) {
+                        lines.push(line)
                     }
                 }
                 this.$nextTick(function() {
                     if (location.hash == '') {
                         location.hash = 'paragraph-0'
-                    } else {
-                        location.hash = ''
-                        location.hash = 'p-' + this.paragraph + '-c-' + 600
                     }
                 })
                 return lines
@@ -165,18 +158,45 @@
                     bookmark.style.left = x + 'px'
                     position = left
             },
-            rubify: function(text, bookmark=false) {
+            rubify: function(text) {
                 // hiragana katakana fw-roman hw-katakana unicodes:
                 // \u3040-\u309f\u30a0-\u30ff\uff00-\uff9f
                 //｜ is the kanji separator (different from ascii pipe |)
                 furigana = /｜?([\u4e00-\u9faf\u3400-\u4dbf]+?)《(.+?)》/g;
-                if (bookmark) {
-                    text = text.replace(furigana, '<ruby>$1<rt>$2</rt></ruby>');
-                    console.log("bookmarked")
-                    return text.slice(0,bookmark) + '<span id="p-46-c-600">' + text[bookmark] + '</span>' + text.slice(bookmark + 1)
-                } else {
-                    return text.replace(furigana, '<ruby>$1<rt>$2</rt></ruby>');
+                return text.replace(furigana, '<ruby>$1<rt>$2</rt></ruby>');
+            },
+            boutenify: function(text) {
+                bouten = /(.+?)［＃「\1」に傍点］/g;
+                return text.replace(bouten, '<span class="sesame-vertical">$1</span>')
+            },
+            kutenkara: function(text) {
+                // TODO: unicode
+                jiskuten = /※［＃[「言＋墟のつくり」、]?第(\d+)水準(\d+)-(\d+)-(\d+)］/g
+                return text.replace(jiskuten, "※")
+            },
+            sage: function(text) {
+                sagepattern = /^［＃ここから([０-９]+?)字下げ］/
+                fullwidth = text.match(sagepattern)
+                if (fullwidth) {
+                    jisage = String.fromCharCode(fullwidth[1].charCodeAt(0) - 0xFEE0)
+                    return '<div style="margin-top:' + jisage + 'em">'
                 }
+                owaripattern = /^［＃ここで字下げ終わり］/
+                owari = text.match(owaripattern)
+                if (owari) {
+                    return '</div>'
+                }
+                return text
+            },
+            transform: function(text) {
+                // first, do things like simple search and replace. These should be commutative and idempotent
+                text = this.rubify(text)
+                text = this.boutenify(text)
+                text = this.kutenkara(text)
+
+                // next, do multi-line formatting
+                text = this.sage(text)
+                return text
             },
             loadFile: function() {
                 decoder = new TextDecoder(this.encoding, {fatal:true})
