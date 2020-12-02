@@ -79,12 +79,12 @@
             <div class="book-wrapper" v-if="isLoaded">
                 <div class="book-panel">
                     <div class="bookmark" v-bind:style="bookmarkPos" v-bind:id="'bookmark-'+position"></div>
-                    <div
-                        class="paragraph"
-                        v-for="(line, index) in displayLines"
-                        v-bind:id="'paragraph-'+index"
-                        v-html="line"
-                    >
+                    <component
+                        v-bind:key="text.index"
+                        v-for="text in textComponents"
+                        v-bind:is="text.textType"
+                        v-bind:text="text"
+                    ></component>
                     </div>
                 </div>
             </div>
@@ -93,9 +93,57 @@
 </div>
 
 <script>
+    Vue.component('Paragraph', {
+        props: ['text'],
+        data: function () {
+            ret = {
+                jisageStyle: {
+                    margin: this.text.jisage + "em 0 0 0"
+                },
+                paragraphId: "paragraph-" + this.text.index,
+            }
+            if (this.text.jisage === 0 || this.text.jisage === "" || this.text.jisage === "0") {
+                ret.jisageStyle = {}
+            }
+            return ret
+        },
+        template: `
+            <div
+                v-bind:id="paragraphId"
+                v-html="text.content"
+                v-bind:style="jisageStyle"
+                class="paragraph"
+            ></div>
+        ` 
+    })
+    Vue.component('Header', {
+        props: ['text'],
+        data: function() {
+            ret = {
+                headerId: "header-" + this.text.index,
+            }
+            return ret
+        },
+        render: function(createElement) {
+            return createElement(
+                'h' + this.text.hLevel,
+                {
+                    class: {
+                        header: true,
+                    },
+                    style: {
+                        margin: this.text.jisage + "em 0 0 0",
+                    },
+                    key: this.text.index,
+                },
+                this.text.content,
+            )
+        },
+    })
     var app = new Vue({
         el: '#app',
         data: {
+            jisage: 0,
             bookmarking: false,
             hash: '',
             message: 'welcome to 小説ブック',
@@ -125,17 +173,72 @@
             bookmarkPos: function() {
                 return {left: this.position + 'px'}
             },
-            title: function() { return this.bookLines[0] || '' },
-            displayLines: function() {
+            textComponents: function() {
                 var self = this;
-                lines = [];
+                texts = [];
                 if (this.bookLines.length == 0) {
                     return []
                 }
                 for (var i = 0; i < this.bookLines.length; i++) {
-                    line = this.transform(this.bookLines[i])
-                    if (line) {
-                        lines.push(line)
+                    // the text props we will pass to the Paragraph or Header component
+                    var text = {
+                        jisage: this.jisage,
+                        index: i,
+                        content: "",
+                        textType: 'Paragraph',
+                    }
+                    var content = this.bookLines[i]
+
+                    // first, check if it's a formatting line
+                    sagepattern = /^［＃(ここから)?([０-９]+?)字下げ］/
+                    fullwidth = content.match(sagepattern)
+                    if (fullwidth) {
+                        jisage = String.fromCharCode(fullwidth[2].charCodeAt(0) - 0xFEE0)
+                        // if ここから then continue, else change jisage for the current line
+                        if (fullwidth[1]) {
+                            this.jisage = jisage
+                            continue
+                        } else {
+                            text.jisage = jisage
+                            content.replace(sagepattern, "")
+                        }
+                    }
+                    owaripattern = /^［＃ここで字下げ終わり］/
+                    owari = content.match(owaripattern)
+                    if (owari) {
+                        this.jisage = 0
+                        continue
+                    }
+
+                    // format headers
+                    midasipattern = /(.+?)［＃「\1」は([大中小])見出し］/g
+                    content = content.replace(midasipattern, function(match, p1, p2, offset, string) {
+                        text.textType = 'Header'
+                        switch(p2) {
+                            case "大":
+                                text.hLevel = 1;
+                                break;
+                            case "中":
+                                text.hLevel = 2;
+                                break;
+                            case "小":
+                                text.hLevel = 3;
+                                break;
+                            default:
+                                text.hLevel = 1;
+                        }
+                        return p1;
+                    })
+
+                    // next, do things like simple search and replace
+                    content = this.kutenkara(content)
+                    content = this.rubify(content)
+                    content = this.boutenify(content)
+                    content = this.todo(content)
+
+                    if (content) {
+                        text.content = content
+                        texts.push(text)
                     }
                 }
                 this.$nextTick(function() {
@@ -143,7 +246,7 @@
                         location.hash = 'paragraph-0'
                     }
                 })
-                return lines
+                return texts
             },
         },
         methods: {
@@ -162,7 +265,7 @@
                 // hiragana katakana fw-roman hw-katakana unicodes:
                 // \u3040-\u309f\u30a0-\u30ff\uff00-\uff9f
                 //｜ is the kanji separator (different from ascii pipe |)
-                furigana = /｜?([\u4e00-\u9faf\u3400-\u4dbf]+?)《(.+?)》/g;
+                furigana = /｜?([々\u4e00-\u9faf\u3400-\u4dbf]+?)《(.+?)》/g;
                 return text.replace(furigana, '<ruby>$1<rt>$2</rt></ruby>');
             },
             boutenify: function(text) {
@@ -170,9 +273,33 @@
                 return text.replace(bouten, '<span class="sesame-vertical">$1</span>')
             },
             kutenkara: function(text) {
-                // TODO: unicode
-                jiskuten = /※［＃[「言＋墟のつくり」、]?第(\d+)水準(\d+)-(\d+)-(\d+)］/g
+                // TODO: non-kanji and unicode
+                jiskuten = /※［＃(?:「(.+?)」、)?第(\d+?)水準(\d+?)-(\d+?)-(\d+?)］/g
                 return text.replace(jiskuten, "※")
+            },
+            midasi: function(text) {
+                midasipattern = /(.+?)［＃「\1」は([大中小])見出し］/g
+                return text.replace(midasipattern, function(match, p1, p2, offset, string) {
+                    switch(p2) {
+                        case "大":
+                            return '<h1>' + p1 + '</h1>';
+                            break;
+                        case "中":
+                            return '<h2>' + p1 + '</h2>';
+                            break;
+                        case "小":
+                            return '<h3>' + p1 + '</h3>';
+                            break;
+                    }
+                })
+            },
+            todo: function(text) {
+                // TODO: these are the other formatting options that I haven't implemented yet, but just remove for now
+                comments = /［＃.+?］/g
+                accents = /[〔〕]/g
+                text = text.replace(comments, "")
+                text = text.replace(accents, "")
+                return text
             },
             sage: function(text) {
                 sagepattern = /^［＃ここから([０-９]+?)字下げ］/
@@ -186,16 +313,6 @@
                 if (owari) {
                     return '</div>'
                 }
-                return text
-            },
-            transform: function(text) {
-                // first, do things like simple search and replace. These should be commutative and idempotent
-                text = this.rubify(text)
-                text = this.boutenify(text)
-                text = this.kutenkara(text)
-
-                // next, do multi-line formatting
-                text = this.sage(text)
                 return text
             },
             loadFile: function() {
