@@ -78,7 +78,7 @@
             {{ isLoaded ? null : 'Drag and drop aozora bunko file'}}
             <div class="book-wrapper" v-if="isLoaded">
                 <div class="book-panel">
-                    <div class="bookmark" v-bind:style="bookmarkPos" v-bind:id="'bookmark-'+position"></div>
+                    <bookmark></bookmark>
                     <component
                         v-bind:key="text.index"
                         v-for="text in textComponents"
@@ -93,7 +93,24 @@
 </div>
 
 <script>
-    Vue.component('Paragraph', {
+    Vue.component('TheBookmark', {
+        bookmarkPos: function() {
+            return {left: this.position + 'px'}
+        },
+        data: function() {
+            return {
+                position: 0,
+            }
+        },
+        template: `
+            <div
+                class="bookmark"
+                v-bind:style="bookmarkPos"
+                v-bind:id="'bookmark-'+position"
+            ></div>
+        `
+    });
+    Vue.component('BaseParagraph', {
         props: ['text'],
         data: function () {
             ret = {
@@ -116,23 +133,23 @@
             ></div>
         ` 
     });
-    Vue.component('LineBreak', {
+    Vue.component('BaseLineBreak', {
         props:['text'],
         template: '<br>'
     });
-    Vue.component('Title', {
+    Vue.component('TheTitle', {
         props:['text'],
         template: `
             <h1>{{text.content}}</h1>
         `
     });
-    Vue.component('Author', {
+    Vue.component('TheAuthor', {
         props:['text'],
         template: `
             <h2>{{text.content}}</h2>
         `
     });
-    Vue.component('Header', {
+    Vue.component('TheHeader', {
         props: ['text'],
         data: function() {
             ret = {
@@ -186,9 +203,6 @@
             });
         },
         computed: {
-            bookmarkPos: function() {
-                return {left: this.position + 'px'}
-            },
             textComponents: function() {
                 var self = this;
                 texts = [];
@@ -199,7 +213,7 @@
                 var title = {
                         index: 0,
                         content: this.bookLines[0],
-                        textType: 'Title',
+                        textType: 'TheTitle',
                 }
                 texts.push(title)
 
@@ -207,7 +221,7 @@
                 var author = {
                         index: 1,
                         content: this.bookLines[1],
-                        textType: 'Author',
+                        textType: 'TheAuthor',
                 }
                 texts.push(author)
 
