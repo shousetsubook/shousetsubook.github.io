@@ -115,7 +115,23 @@
                 class="paragraph"
             ></div>
         ` 
-    })
+    });
+    Vue.component('LineBreak', {
+        props:['text'],
+        template: '<br>'
+    });
+    Vue.component('Title', {
+        props:['text'],
+        template: `
+            <h1>{{text.content}}</h1>
+        `
+    });
+    Vue.component('Author', {
+        props:['text'],
+        template: `
+            <h2>{{text.content}}</h2>
+        `
+    });
     Vue.component('Header', {
         props: ['text'],
         data: function() {
@@ -139,7 +155,7 @@
                 this.text.content,
             )
         },
-    })
+    });
     var app = new Vue({
         el: '#app',
         data: {
@@ -179,7 +195,33 @@
                 if (this.bookLines.length == 0) {
                     return []
                 }
-                for (var i = 0; i < this.bookLines.length; i++) {
+                // book title
+                var title = {
+                        index: 0,
+                        content: this.bookLines[0],
+                        textType: 'Title',
+                }
+                texts.push(title)
+
+                // book author
+                var author = {
+                        index: 1,
+                        content: this.bookLines[1],
+                        textType: 'Author',
+                }
+                texts.push(author)
+
+                // metadata
+                var divisor = /^-----/;
+                var metadataEnd = 4;
+                // arbitrarily stop at 100. If we hit 100, something is wrong so just include the metadata
+                for (var i = metadataEnd; i < 100; i++) {
+                    if (this.bookLines[i].match(divisor)) {
+                        metadataEnd = i
+                        break
+                    }
+                }
+                for (var i = metadataEnd + 1; i < this.bookLines.length; i++) {
                     // the text props we will pass to the Paragraph or Header component
                     var text = {
                         jisage: this.jisage,
@@ -188,6 +230,12 @@
                         textType: 'Paragraph',
                     }
                     var content = this.bookLines[i]
+                    // line break
+                    if (content === "") {
+                        text.textType = 'LineBreak';
+                        texts.push(text);
+                        continue;
+                    }
 
                     // first, check if it's a formatting line
                     sagepattern = /^［＃(ここから)?([０-９]+?)字下げ］/
@@ -340,7 +388,7 @@
                 }
             },
         },
-    })
+    });
 </script>
 </body>
 </html>
