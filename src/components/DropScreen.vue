@@ -13,8 +13,8 @@
 
 <script>
 import TheBook from './TheBook.vue'
-
-export default {
+import Vue from 'vue'
+export default Vue.extend({
     name: 'DropScreen',
     components: {
         TheBook
@@ -51,7 +51,7 @@ export default {
             }
         },
     }
-}
+});
 </script>
 
 <style scoped>

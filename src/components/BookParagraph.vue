@@ -8,7 +8,8 @@
 </template>
 
 <script>
-export default {
+import Vue from 'vue'
+export default Vue.extend({
     name: 'BookParagraph',
     props: ['text'],
     data: function () {
@@ -19,7 +20,7 @@ export default {
             }
         }
     }
-}
+});
 </script>
 
 <style scoped>

@@ -1,5 +1,6 @@
 <script>
-export default {
+import Vue from 'vue'
+export default Vue.extend({
         props: ['text'],
         data: function() {
             return {
@@ -22,7 +23,7 @@ export default {
                 this.text.content,
             )
         },
-}
+});
 </script>
     });
     <style>

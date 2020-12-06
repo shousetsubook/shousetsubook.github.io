@@ -21,8 +21,8 @@ import BookBookmark from './BookBookmark.vue'
 import BookParagraph from './BookParagraph.vue'
 import BookHeader from './BookHeader.vue'
 import BookLineBreak from './BookLineBreak.vue'
-
-export default {
+import Vue from 'vue'
+export default Vue.extend({
     name: 'TheBook',
 
     components: {
@@ -186,7 +186,7 @@ export default {
         bookBytes: ArrayBuffer,
         test: String,
     }
-}
+});
 </script>
 
 <style scoped>
