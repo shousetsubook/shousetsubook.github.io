@@ -50,17 +50,6 @@
             height: 100%;
             position:absolute;
         }
-        .bookmark {
-            margin-top:-9vh;
-            color: rgb(255, 255, 255);
-            padding: 1vh;
-            height:7vh;
-            position:absolute;
-            pointer-events: none;
-            font-size:5vh;
-            width: 3px;
-            background-color:rgb(45, 82, 185);
-        }
 
         [v-cloak] {
             display: none;
@@ -78,7 +67,9 @@
             {{ isLoaded ? null : 'Drag and drop aozora bunko file'}}
             <div class="book-wrapper" v-if="isLoaded">
                 <div class="book-panel">
-                    <bookmark></bookmark>
+                    <the-bookmark></the-bookmark>
+                    <the-book-title></the-book-title>
+                    <the-book-author></the-book-author>
                     <component
                         v-bind:key="text.index"
                         v-for="text in textComponents"
@@ -93,24 +84,38 @@
 </div>
 
 <script>
-    Vue.component('TheBookmark', {
+    Vue.component('BookTheBookmark', {
         bookmarkPos: function() {
             return {left: this.position + 'px'}
         },
         data: function() {
             return {
                 position: 0,
+                bookmarkClass: {
+                    'margin-top':'-9vh',
+                    'color': 'rgb(255, 255, 255)',
+                    'padding': '1vh',
+                    'height':'7vh',
+                    'position':'absolute',
+                    'pointer-events': 'none',
+                    'font-size':'5vh',
+                    'width': '3px',
+                    'background-color':'rgb(45, 82, 185)',
+                },
+                bookmarkPos: {
+                    left: this.position + 'px',
+                }
             }
         },
         template: `
             <div
-                class="bookmark"
+                v-bind:class="bookmarkClass"
                 v-bind:style="bookmarkPos"
                 v-bind:id="'bookmark-'+position"
             ></div>
-        `
+        `,
     });
-    Vue.component('BaseParagraph', {
+    Vue.component('BookParagraph', {
         props: ['text'],
         data: function () {
             ret = {
@@ -133,23 +138,21 @@
             ></div>
         ` 
     });
-    Vue.component('BaseLineBreak', {
+    Vue.component('BookLineBreak', {
         props:['text'],
         template: '<br>'
     });
-    Vue.component('TheTitle', {
-        props:['text'],
+    Vue.component('TheBookTitle', {
         template: `
             <h1>{{text.content}}</h1>
         `
     });
-    Vue.component('TheAuthor', {
-        props:['text'],
+    Vue.component('TheBookAuthor', {
         template: `
             <h2>{{text.content}}</h2>
         `
     });
-    Vue.component('TheHeader', {
+    Vue.component('BookHeader', {
         props: ['text'],
         data: function() {
             ret = {
@@ -177,19 +180,12 @@
         el: '#app',
         data: {
             jisage: 0,
-            bookmarking: false,
             hash: '',
-            message: 'welcome to 小説ブック',
             isDraggingFile: false,
             encoding: 'shift-jis',
-            paragraph: 46,
-            character: 0,
             isLoaded: false,
-            isRuby: true,
             bookBytes: new ArrayBuffer(),
             bookLines: [],
-            titleLines: [],
-            infoLines: [],
             character: 0,
         },
         created: function() {
@@ -203,6 +199,12 @@
             });
         },
         computed: {
+            theTitle: {
+
+            },
+            theAuthor: {
+
+            },
             textComponents: function() {
                 var self = this;
                 texts = [];
@@ -213,7 +215,7 @@
                 var title = {
                         index: 0,
                         content: this.bookLines[0],
-                        textType: 'TheTitle',
+                        textType: 'BookTheTitle',
                 }
                 texts.push(title)
 
@@ -221,7 +223,7 @@
                 var author = {
                         index: 1,
                         content: this.bookLines[1],
-                        textType: 'TheAuthor',
+                        textType: 'BookTheAuthor',
                 }
                 texts.push(author)
 
@@ -236,17 +238,17 @@
                     }
                 }
                 for (var i = metadataEnd + 1; i < this.bookLines.length; i++) {
-                    // the text props we will pass to the Paragraph or Header component
+                    // the text props we will pass to the BookParagraph component
                     var text = {
                         jisage: this.jisage,
                         index: i,
                         content: "",
-                        textType: 'Paragraph',
+                        textType: 'BookParagraph',
                     }
                     var content = this.bookLines[i]
                     // line break
                     if (content === "") {
-                        text.textType = 'LineBreak';
+                        text.textType = 'BookLineBreak';
                         texts.push(text);
                         continue;
                     }
@@ -275,7 +277,7 @@
                     // format headers
                     midasipattern = /(.+?)［＃「\1」は([大中小])見出し］/g
                     content = content.replace(midasipattern, function(match, p1, p2, offset, string) {
-                        text.textType = 'Header'
+                        text.textType = 'BookHeader'
                         switch(p2) {
                             case "大":
                                 text.hLevel = 1;
@@ -315,13 +317,6 @@
             bookmark: function(x) {
                     let {anchorNode, anchorOffset, focusNode, focusOffset} = document.getSelection();
                     console.log(anchorNode, anchorOffset, focusNode, focusOffset)
-                    bookmark = document.getElementsByClassName('bookmark')[0]
-                    newId = 'bookmark-' + x
-                    location.hash = newId
-                    bookmark.id = 'bookmark-' + x
-                    left = x
-                    bookmark.style.left = x + 'px'
-                    position = left
             },
             rubify: function(text) {
                 // hiragana katakana fw-roman hw-katakana unicodes:
