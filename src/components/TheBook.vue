@@ -178,11 +178,6 @@ export default {
                     texts.push(text)
                 }
             }
-            this.$nextTick(function() {
-                if (location.hash == '') {
-                    location.hash = 'paragraph-0'
-                }
-            })
             return texts
         },
     },

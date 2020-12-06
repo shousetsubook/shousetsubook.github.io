@@ -11,7 +11,8 @@ export default {
                 'h' + this.text.hLevel,
                 {
                     class: {
-                        header: true,
+                        'header': true,
+                        'text-component': true,
                     },
                     style: {
                         margin: this.text.jisage + "em 0 0 0",

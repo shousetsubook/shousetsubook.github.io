@@ -3,7 +3,7 @@
         v-bind:id="paragraphId"
         v-html="text.content"
         v-bind:style="jisageStyle"
-        class="paragraph"
+        class="paragraph text-component"
     ></div>
 </template>
 
