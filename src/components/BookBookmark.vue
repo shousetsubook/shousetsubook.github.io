@@ -20,6 +20,12 @@ export default {
         bookmark: function () {
             var selObj = window.getSelection();
             if (selObj.toString()) {
+                var oldBookmark = document.getElementById('bookmark')
+                if (oldBookmark) {
+                    oldBookmark.removeAttribute('id')
+                    oldBookmark.removeAttribute('style')
+                }
+
                 var range = selObj.getRangeAt(0);
                 var textNode = range.startContainer;
                 var offset = range.startOffset;
@@ -27,15 +33,19 @@ export default {
                 var sliceUntilBookmark = document.createTextNode(textNode.textContent.slice(0, offset));
                 var sliceAfterBookmark = document.createTextNode(textNode.textContent.slice(offset+1));
                 var fragment = document.createDocumentFragment();
-                var idSpan = document.createElement('span');
-                idSpan.id = 'bookmark';
-                idSpan.appendChild(bookmarkCharNode);
-                idSpan.style.backgroundColor = 'red'
+                var newBookmark = document.createElement('span');
+                newBookmark.id = 'bookmark';
+                newBookmark.appendChild(bookmarkCharNode);
+                newBookmark.style.backgroundColor = 'red'
                 fragment.appendChild(sliceUntilBookmark);
-                fragment.appendChild(idSpan);
+                fragment.appendChild(newBookmark);
                 fragment.appendChild(sliceAfterBookmark)
-
                 textNode.parentNode.replaceChild(fragment, textNode)
+
+                var domRect = newBookmark.getBoundingClientRect();
+                var bookmarkLeft = domRect.left + window.scrollX;
+                this.position = bookmarkLeft;
+
             }
         }
     },
