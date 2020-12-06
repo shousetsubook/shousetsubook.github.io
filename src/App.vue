@@ -1,28 +1,28 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <component :is="'DropScreen'"/>
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import DropScreen from './components/DropScreen.vue'
 
 export default {
   name: 'App',
   components: {
-    HelloWorld
+    DropScreen,
   }
 }
 </script>
 
 <style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+html, body, #app {
+  background-color:rgb(241, 237, 212);
+  height: 100%;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  position:absolute;
 }
+
 </style>
