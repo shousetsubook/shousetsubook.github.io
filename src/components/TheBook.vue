@@ -36,6 +36,7 @@ export default Vue.extend({
         return {
             position: 0,
             encoding: 'shift-jis',
+            timeToChange: 0,
         }
     },
 
@@ -172,6 +173,10 @@ export default Vue.extend({
                 content = this.rubify(content)
                 content = this.boutenify(content)
                 content = this.todo(content)
+
+                if (this.timeToChange > 0 && i === 28) {
+                    content = content.slice(0,this.timeToChange) + '<span style="background-color: red;">' + content[this.timeToChange] + '</span>' + content.slice(this.timeToChange + 1);
+                }
 
                 if (content) {
                     text.content = content

@@ -126,7 +126,7 @@ export default Vue.extend({
     computed: {
         bookmarkPos(): Object {
             return {
-                left: this.pxPosition + 'px'
+                color: this.pxPosition + 'px'
             }
         },
         bookmarkId(): string {
@@ -156,13 +156,13 @@ export default Vue.extend({
                 var fragment = this.createBookmarkFromTextNode(bookmarkedNode, this.paragraphIndex, this.nodeIndex, this.charIndex);
                 bookmarkedNode.replaceWith(fragment);
             }
+            this.moveBookmark();
         }
         window.addEventListener('keydown', function(e) {
             if (e.code === 'Space' || e.code === ' ') {
                 self.bookmark()
             }
         });
-        this.moveBookmark();
         this.resetHash();
     }
     
