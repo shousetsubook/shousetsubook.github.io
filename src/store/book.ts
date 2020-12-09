@@ -15,18 +15,9 @@ interface BookContext {
 }
 
 export class BookState {
-
+    bookFile: BookFile | null = null;
     rawLines: string[] = [];
     textComponents: Array<TextComponent> = [];
-    bookmark: {
-        line: number,
-        character: number,
-    };
-
-    constructor(rawLines: Array<string>, bookmark: {line :number,character :number}) {
-        this.rawLines = [];
-        this.bookmark = bookmark
-    }
 }
 
 
@@ -34,14 +25,8 @@ export interface BookFile {
     file: File,
     encoding: string,
 }
-const state = () :BookState => ({
-    rawLines: [],
-    textComponents: [],
-    bookmark: {
-        line: 0,
-        character: 0,
-    },
-});
+
+const state = () :BookState => new BookState();
 
 // getters
 const getters = {
@@ -158,6 +143,7 @@ const actions = {
         reader.onload = () => {
             var rawString = reader.result as string;
             context.commit('loadRawLines', rawString.split(/\r?\n/))
+            context.commit('loadFile', payload)
         };
     },
 }
@@ -166,6 +152,10 @@ const actions = {
 const mutations = {
     loadRawLines (state :BookState, payload :Array<string>) {
         state.rawLines = payload
+    },
+
+    loadFile (state :BookState, payload :BookFile) {
+        state.bookFile = payload
     }
 }
 
