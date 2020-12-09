@@ -7,7 +7,7 @@
     <div class="welcome-wrapper">
         <h1 v-if="!isLoaded" class="welcome">Drag and drop unzipped Aozora Bunko text file</h1>
     </div>
-    <TheBook :bookBytes=bookBytes v-if="isLoaded"/>
+    <TheBook v-if="isLoaded"/>
     </div>
 </template>
 
@@ -22,7 +22,6 @@ export default Vue.extend({
 
     data: function() {
         return {
-            test: 'Test',
             isDraggingFile: false,
             isLoaded: false,
             bookBytes: new ArrayBuffer(),
@@ -45,8 +44,11 @@ export default Vue.extend({
                 var self = this;
                 reader.onload = function () {
                     self.isLoaded = true
-                    self.test = 'File loaded'
-                    self.bookBytes = reader.result
+                    self.$store.commit({
+                        type: 'book/loadFromBytes',
+                        bytes: reader.result,
+                        encoding: 'shift-jis',
+                    })
                 }
             }
         },
