@@ -8,6 +8,12 @@ export interface TextComponent {
     textType: string,
 }
 
+interface BookContext {
+    commit: Function
+    state: Object
+    dispatch: Function
+}
+
 export class BookState {
 
     rawLines: string[] = [];
@@ -24,8 +30,8 @@ export class BookState {
 }
 
 
-export interface BookBytes {
-    bytes: ArrayBuffer,
+export interface BookFile {
+    file: File,
     encoding: string,
 }
 const state = () :BookState => ({
@@ -146,20 +152,27 @@ const getters = {
 
 // actions
 const actions = {
+    loadFromFile (context :BookContext, payload :BookFile) {
+        var reader = new FileReader();
+        reader.readAsText(payload.file, payload.encoding);
+        reader.onload = () => {
+            var rawString = reader.result as string;
+            context.commit('loadRawLines', rawString.split(/\r?\n/))
+        };
+    },
 }
 
 // mutations
 const mutations = {
-    loadFromBytes (state :BookState, payload :BookBytes) {
-        var decoder = new TextDecoder(payload.encoding, {fatal:true});
-        var rawString = decoder.decode(payload.bytes);
-        state.rawLines = rawString.split(/\r?\n/);
+    loadRawLines (state :BookState, payload :Array<string>) {
+        state.rawLines = payload
     }
 }
 
 export default {
   namespaced: true,
   state,
+  actions,
   getters,
   mutations
 }

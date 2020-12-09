@@ -11,7 +11,7 @@
     </div>
 </template>
 
-<script>
+<script lang="ts">
 import TheBook from './TheBook.vue'
 import Vue from 'vue'
 export default Vue.extend({
@@ -23,9 +23,12 @@ export default Vue.extend({
     data: function() {
         return {
             isDraggingFile: false,
-            isLoaded: false,
-            bookBytes: new ArrayBuffer(),
+            bookBytes: new ArrayBuffer(0),
         }
+    },
+
+    computed: {
+        isLoaded() { return this.$store.getters['book/isLoaded']},
     },
 
     methods: {
@@ -39,17 +42,11 @@ export default Vue.extend({
             this.isDraggingFile = false;
             for (var i = 0; i < e.dataTransfer.files.length; i++) {
                 var file = e.dataTransfer.files[i];
-                var reader = new FileReader();
-                reader.readAsArrayBuffer(file);
-                var self = this;
-                reader.onload = function () {
-                    self.isLoaded = true
-                    self.$store.commit({
-                        type: 'book/loadFromBytes',
-                        bytes: reader.result,
-                        encoding: 'shift-jis',
-                    })
-                }
+                this.$store.dispatch({
+                    type: 'book/loadFromFile',
+                    file: file,
+                    encoding: 'shift-jis',
+                })
             }
         },
     }
