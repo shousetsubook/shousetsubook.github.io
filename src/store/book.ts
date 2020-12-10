@@ -1,4 +1,5 @@
 import { todo, rubify, midasi, boutenify, kutenkara } from '../helpers/aozora'
+import { Bookmark, insertBookmark } from '../helpers/bookmark'
 
 export interface TextComponent {
     jisage: number,
@@ -16,6 +17,11 @@ interface BookContext {
 
 export class BookState {
     bookFile: BookFile | null = null;
+    bookmark: Bookmark = {
+        paragraph: 0,
+        node: 0,
+        character: 0,
+    };
     rawLines: string[] = [];
     textComponents: Array<TextComponent> = [];
 }
@@ -43,10 +49,45 @@ const getters = {
         return state.rawLines;
     },
     textComponents: (state :BookState) :Array<TextComponent> => {
+        return state.textComponents;
+    }
+}
 
+
+// actions
+const actions = {
+    loadFromFile (context :BookContext, payload :BookFile) {
+        return new Promise((resolve) => {
+            var reader = new FileReader();
+            reader.onload = () => {
+                var rawString = reader.result as string;
+                context.commit('loadRawLines', rawString.split(/\r?\n/))
+                context.commit('loadFile', payload)
+                resolve();
+            };
+            reader.readAsText(payload.file, payload.encoding);
+        });
+    },
+    reloadWithEncoding (context :BookContext, payload :string) {
+        return new Promise((resolve) => {
+            var reader = new FileReader();
+            reader.onload = () => {
+                var rawString = reader.result as string;
+                context.commit('loadRawLines', rawString.split(/\r?\n/))
+                resolve();
+            };
+            reader.readAsText(context.state.bookFile.file, payload);
+        });
+    },
+}
+
+// mutations
+const mutations = {
+    loadRawLines (state :BookState, payload :Array<string>) {
+        state.rawLines = payload
         var texts = [];
         if (state.rawLines.length == 0) {
-            return []
+            state.textComponents = [];
         }
 
         // metadata
@@ -99,64 +140,54 @@ const getters = {
                 continue
             }
 
-            // format headers
-            var midasipattern = /(.+?)［＃「\1」は([大中小])見出し］/g
-            content = content.replace(midasipattern, function(match, p1, p2) {
-                text.textType = 'BookHeader'
-                switch(p2) {
-                    case "大":
-                        text.hLevel = 1;
-                        break;
-                    case "中":
-                        text.hLevel = 2;
-                        break;
-                    case "小":
-                        text.hLevel = 3;
-                        break;
-                    default:
-                        text.hLevel = 1;
-                }
-                return p1;
-            })
-
             // next, do things like simple search and replace
             content = kutenkara(content)
             content = rubify(content)
             content = boutenify(content)
+            content = midasi(content)
             content = todo(content)
+
+            // add bookmark if available
+            if (state.bookmark.paragraph === i) {
+                content = insertBookmark(content, state.bookmark);
+            }
 
             if (content) {
                 text.content = content
                 texts.push(text)
             }
         }
-        return texts;
-    }
-}
-
-
-// actions
-const actions = {
-    loadFromFile (context :BookContext, payload :BookFile) {
-        var reader = new FileReader();
-        reader.readAsText(payload.file, payload.encoding);
-        reader.onload = () => {
-            var rawString = reader.result as string;
-            context.commit('loadRawLines', rawString.split(/\r?\n/))
-            context.commit('loadFile', payload)
-        };
+        state.textComponents = texts;
     },
-}
 
-// mutations
-const mutations = {
-    loadRawLines (state :BookState, payload :Array<string>) {
-        state.rawLines = payload
+    loadBookmark (state :BookState, bookmark :Bookmark) {
+        // rawLines content
+        var content = state.bookmark.content;
+        console.log("Before:")
+        console.log(state.bookmark.content);
+
+        // replace the old bookmark with the new bookmark. "state.bookmark.content" is gone
+        state.bookmark = bookmark;
+        for (var i = 0; i < state.textComponents.length; i++) {
+            if (state.textComponents[i].index === bookmark.paragraph) {
+                // if we have rawLines content stored
+                if (content) {
+                    state.textComponents[i].content = insertBookmark(content, bookmark);
+                    state.bookmark.content = content;
+                } else {
+                    state.bookmark.content = state.textComponents[i].content
+                    state.textComponents[i].content = insertBookmark(state.textComponents[i].content, bookmark)
+                }
+            }
+        }
+
+        console.log("After:")
+        console.log(state.bookmark.content);
     },
 
     loadFile (state :BookState, payload :BookFile) {
-        state.bookFile = payload
-    }
+        state.bookFile = payload ;
+    },
 }
 
 export default {
