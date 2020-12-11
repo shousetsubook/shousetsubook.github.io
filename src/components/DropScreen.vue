@@ -40,13 +40,15 @@ export default Vue.extend({
         },
         onFileDrop: function(e :DragEvent) {
             this.isDraggingFile = false;
-            for (var i = 0; i < e.dataTransfer.files.length; i++) {
-                var file = e.dataTransfer.files[i];
-                this.$store.dispatch({
-                    type: 'book/loadFromFile',
-                    file: file,
-                    encoding: 'shift-jis',
-                })
+            if (e.dataTransfer) {
+                for (var i = 0; i < e.dataTransfer.files.length; i++) {
+                    var file = e.dataTransfer.files[i];
+                    this.$store.dispatch({
+                        type: 'book/loadFromFile',
+                        file: file,
+                        encoding: 'shift-jis',
+                    })
+                }
             }
         },
     }
