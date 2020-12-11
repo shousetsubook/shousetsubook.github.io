@@ -6,9 +6,9 @@ const ghpages = require('gh-pages');
 // create SimpleGit instance with shousetsubook directory
 console.log(process.cwd() + '/dist')
 var shousetsubook = simpleGit();
-shousetsubook.status(onStatus).revparse('HEAD', onRevparse);
+shousetsubook.fetch('--all').status(onStatus).getRemotes(true,onGetRemotes).revparse('HEAD', onRevparse);
+var gitConditions = [];
 function onStatus (err, statusResult) {
-    var gitConditions = [];
     if (!statusResult.isClean()) {
         gitConditions.push('working directory is not clean');
     }
@@ -21,14 +21,28 @@ function onStatus (err, statusResult) {
     if (statusResult.ahead !== 0 && statusResult.behind !== 0) {
         gitConditions.push('current branch is not up-to-date with origin/main');
     }
-    if (gitConditions.length > 0) {
-        console.log('Could not deploy because ' + gitConditions.join(' and '));
-        exit(1);
+    if (statusResult.ahead !== 0 && statusResult.behind !== 0) {
+        gitConditions.push('current branch is not up-to-date with origin/main');
     }
 
-    child_process.execSync('npm run build',{stdio:[0,1,2]});
+//    child_process.execSync('npm run build',{stdio:[0,1,2]});
+}
+function onGetRemotes(err, getRemotesResult) {
+    correctRemote = false;
+    getRemotesResult.forEach(remote => {
+        if (remote.name == 'origin' && remote.push == 'git@github.com:shousetsubook/shousetsubook.github.io.git' && remote.push == remote.fetch) {
+            correctRemote = true;
+        }
+    })
+    if (!correctRemote) {
+        gitConditions.push('remote origin with fetch and push pointing to git@github.com:shousetsubook/shousetsubook.github.io.git does not exist');
+    }
 }
 function onRevparse (err, commit) {
+    if (gitConditions.length > 0) {
+        console.log('Could not deploy because ' + gitConditions.join(', '));
+        exit(1);
+    }
     console.log('Publishing to gh-pages branch with message: ' + commit)
     ghpages.publish('dist', {
         message: commit
