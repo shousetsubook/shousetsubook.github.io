@@ -1,10 +1,10 @@
 const simpleGit = require('simple-git');
 const child_process = require('child_process');
 const { exit } = require('process');
+const { ghpages } = require('gh-pages');
 
 // create SimpleGit instance with shousetsubook directory
 console.log(process.cwd() + '/dist')
-var dist = simpleGit({baseDir: process.cwd() + '/dist'});
 var shousetsubook = simpleGit();
 shousetsubook.status(onStatus).revparse('HEAD', onRevparse);
 function onStatus (err, statusResult) {
@@ -25,8 +25,12 @@ function onStatus (err, statusResult) {
         console.log('Could not deploy because ' + gitConditions.join(' and '));
         exit(1);
     }
+
     child_process.execSync('npm run build',{stdio:[0,1,2]});
 }
 function onRevparse (err, commit) {
-    dist.add('./*').commit(commit).push('origin','gh-pages')
+    console.log('Publishing to gh-pages branch with message: ' + commit)
+    ghpages.publish('dist', {
+        message: commit
+    });
 }
