@@ -27,7 +27,7 @@ export default Vue.extend({
     height:7vh;
     position: absolute;
     pointer-events: none;
-    font-size: 5vh;
+    font-size: 6vh;
     width: 3px;
     background-color:rgb(45, 82, 185);
 }
