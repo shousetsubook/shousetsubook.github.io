@@ -1,7 +1,7 @@
 const simpleGit = require('simple-git');
 const child_process = require('child_process');
 const { exit } = require('process');
-const { ghpages } = require('gh-pages');
+const ghpages = require('gh-pages');
 
 // create SimpleGit instance with shousetsubook directory
 console.log(process.cwd() + '/dist')
