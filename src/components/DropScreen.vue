@@ -38,7 +38,7 @@ export default Vue.extend({
         onFileDragleave: function() {
             this.isDraggingFile = false;
         },
-        onFileDrop: function(e) {
+        onFileDrop: function(e :DragEvent) {
             this.isDraggingFile = false;
             for (var i = 0; i < e.dataTransfer.files.length; i++) {
                 var file = e.dataTransfer.files[i];

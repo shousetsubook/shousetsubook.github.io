@@ -11,7 +11,7 @@ export interface TextComponent {
 
 interface BookContext {
     commit: Function
-    state: Object
+    state: BookState
     dispatch: Function
 }
 
@@ -36,18 +36,26 @@ const state = () :BookState => new BookState();
 
 // getters
 const getters = {
+    bookmark: (state :BookState) :Bookmark => {
+        return state.bookmark
+    },
+
     isLoaded: (state :BookState) :boolean => (
         state.rawLines.length > 0
     ),
+
     title: (state :BookState) :string => (
         state.rawLines.length >= 2 ? state.rawLines[0] : ''
     ),
+
     author: (state :BookState) :string => (
         state.rawLines.length >= 2 ? state.rawLines[1] : ''
     ),
+
     rawLines: (state :BookState) :Array<string> => {
         return state.rawLines;
     },
+
     textComponents: (state :BookState) :Array<TextComponent> => {
         return state.textComponents;
     }
@@ -69,14 +77,18 @@ const actions = {
         });
     },
     reloadWithEncoding (context :BookContext, payload :string) {
-        return new Promise((resolve) => {
+        return new Promise((resolve, reject) => {
             var reader = new FileReader();
             reader.onload = () => {
                 var rawString = reader.result as string;
                 context.commit('loadRawLines', rawString.split(/\r?\n/))
                 resolve();
             };
-            reader.readAsText(context.state.bookFile.file, payload);
+            if (context.state.bookFile != null) {
+                reader.readAsText(context.state.bookFile.file, payload);
+            } else {
+                reject();
+            }
         });
     },
 }
@@ -163,8 +175,6 @@ const mutations = {
     loadBookmark (state :BookState, bookmark :Bookmark) {
         // rawLines content
         var content = state.bookmark.content;
-        console.log("Before:")
-        console.log(state.bookmark.content);
 
         // replace the old bookmark with the new bookmark. "state.bookmark.content" is gone
         state.bookmark = bookmark;
