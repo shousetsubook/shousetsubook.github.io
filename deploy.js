@@ -25,17 +25,16 @@ function onStatus (err, statusResult) {
         gitConditions.push('current branch is not up-to-date with origin/main');
     }
 
-//    child_process.execSync('npm run build',{stdio:[0,1,2]});
 }
 function onGetRemotes(err, getRemotesResult) {
     correctRemote = false;
     getRemotesResult.forEach(remote => {
-        if (remote.name == 'origin' && remote.push == 'git@github.com:shousetsubook/shousetsubook.github.io.git' && remote.push == remote.fetch) {
+        if (remote.name == 'origin' && remote.refs.push == 'git@github.com:shousetsubook/shousetsubook.github.io.git' && remote.refs.push == remote.refs.fetch) {
             correctRemote = true;
         }
     })
     if (!correctRemote) {
-        gitConditions.push('remote origin with fetch and push pointing to git@github.com:shousetsubook/shousetsubook.github.io.git does not exist');
+        gitConditions.push('remote origin with correct refs does not exist');
     }
 }
 function onRevparse (err, commit) {
@@ -43,6 +42,7 @@ function onRevparse (err, commit) {
         console.log('Could not deploy because ' + gitConditions.join(', '));
         exit(1);
     }
+    child_process.execSync('npm run build',{stdio:[0,1,2]});
     console.log('Publishing to gh-pages branch with message: ' + commit)
     ghpages.publish('dist', {
         message: commit
