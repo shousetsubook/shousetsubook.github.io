@@ -35,27 +35,6 @@ const bookmarkFromHash = (hash :string) :Bookmark => {
     return bookmark;
 }
 
-const removeBookmark = (content :string) :string => {
-    // create a Template to parse easily
-    var template = document.createElement('template');
-    template.innerHTML = content;
-
-    // todo: multiple bookmarking
-    var span = template.content.querySelector(`.${BOOKMARK_CLASS}`);
-    if (span) {
-        var spanContents = document.createTextNode(span.innerHTML);
-        template.content.replaceChild(spanContents,span);
-        // the inner nodes will still be fragmented so this should combine them
-        var temp = template.innerHTML;
-        template.innerHTML = temp;
-        return template.innerHTML;
-    } else {
-        console.log("Couldn't remove bookmark")
-        return content;
-    }
-
-}
-
 const insertBookmark = (content :string, bookmark: Bookmark) :string => {
     // create a Template to parse easily
     var template = document.createElement('template');
