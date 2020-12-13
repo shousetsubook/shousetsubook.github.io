@@ -20,10 +20,9 @@ export default Vue.extend({
         TheBook
     },
 
-    data: function() {
+    data() {
         return {
             isDraggingFile: false,
-            bookBytes: new ArrayBuffer(0),
         }
     },
 
@@ -32,13 +31,13 @@ export default Vue.extend({
     },
 
     methods: {
-        onFileDragover: function() {
+        onFileDragover() {
             this.isDraggingFile = true;
         },
-        onFileDragleave: function() {
+        onFileDragleave() {
             this.isDraggingFile = false;
         },
-        onFileDrop: function(e :DragEvent) {
+        onFileDrop(e :DragEvent) {
             this.isDraggingFile = false;
             if (e.dataTransfer) {
                 for (var i = 0; i < e.dataTransfer.files.length; i++) {

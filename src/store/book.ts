@@ -64,6 +64,69 @@ const getters = {
 
 // actions
 const actions = {
+    bookmarkClick (context :BookContext, payload :{e:MouseEvent} ) {
+        var target = payload.e.target as HTMLElement
+        if (target == null || target.id == null) {
+            console.log('Invalid target. Logging event for debugging')
+            console.log(payload.e)
+            return 
+        }
+        if (!target.classList.contains('paragraph')) {
+            // can only bookmark when clicking on the text. Todo, get nearest paragraph of click
+            return
+        }
+        if (!target.id.startsWith('BookParagraph')) {
+            // TODO: try bubbling up before just exiting, could have clicked on a child node
+            // https://github.com/shousetsubook/shousetsubook.github.io/blob/50bd35b2abbecb2e82c766088082a88d3450bc07/src/components/BookBookmark.vue#L105
+            console.log("didn't click on what we expected. Logging target for debug info")
+            console.log(target)
+            return
+        }
+        var paragraphIndexString = target.id.match(/(\d+)/)[0];
+        if (paragraphIndexString == null) {
+            console.log("couldn't get paragraph index from id. Logging target for debug info")
+            console.log(target)
+            return
+        }
+        var paragraphIndex = parseInt(paragraphIndexString);
+
+        var textComponent :TextComponent;
+        for (let i = 0; i < context.state.textComponents.length; i++) {
+            if (context.state.textComponents[i].index == paragraphIndex) {
+                textComponent = context.state.textComponents[i]
+            }
+        }
+        if (textComponent == null) {
+            console.log("something wrong with textComponent, logging paragraphIndex")
+            console.log(paragraphIndexString)
+            console.log(context.state.textComponents)
+        }
+        // TODO remove old bookmark, if it exists
+
+        var range: Range | CaretPosition;
+        var offset: number;
+        var textNode: Node;
+        if (document.caretPositionFromPoint) {    // Firefox
+            range = document.caretPositionFromPoint(payload.e.x,payload.e.y) as CaretPosition;
+            textNode = range.offsetNode;
+            offset = range.offset;
+        } else if (document.caretRangeFromPoint) {     // Chromium-based
+            range = document.caretRangeFromPoint(payload.e.x,payload.e.y) as Range;
+            textNode = range.startContainer;
+            offset = range.startOffset;
+        } else {
+            console.log('unsupported browser')
+            return
+        }
+        var nodeIndex: number = Array.prototype.indexOf.call(target.childNodes, textNode);
+        var bookmark = {
+            paragraph: paragraphIndex,
+            node: nodeIndex,
+            character: offset,
+        }
+        textComponent.content = insertBookmark(textComponent.content, bookmark)
+
+    },
     loadFromFile (context :BookContext, payload :BookFile) {
         return new Promise((resolve) => {
             var reader = new FileReader();
@@ -181,6 +244,7 @@ const mutations = {
         for (var i = 0; i < state.textComponents.length; i++) {
             if (state.textComponents[i].index === bookmark.paragraph) {
                 // if we have rawLines content stored
+                // TODO: this doesn't feel that robust, try considering a cleaner solution
                 if (content) {
                     state.textComponents[i].content = insertBookmark(content, bookmark);
                     state.bookmark.content = content;
@@ -190,9 +254,6 @@ const mutations = {
                 }
             }
         }
-
-        console.log("After:")
-        console.log(state.bookmark.content);
     },
 
     loadFile (state :BookState, payload :BookFile) {
