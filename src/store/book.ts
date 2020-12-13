@@ -64,69 +64,6 @@ const getters = {
 
 // actions
 const actions = {
-    bookmarkClick (context :BookContext, payload :{e:MouseEvent} ) {
-        var target = payload.e.target as HTMLElement
-        if (target == null || target.id == null) {
-            console.log('Invalid target. Logging event for debugging')
-            console.log(payload.e)
-            return 
-        }
-        if (!target.classList.contains('paragraph')) {
-            // can only bookmark when clicking on the text. Todo, get nearest paragraph of click
-            return
-        }
-        if (!target.id.startsWith('BookParagraph')) {
-            // TODO: try bubbling up before just exiting, could have clicked on a child node
-            // https://github.com/shousetsubook/shousetsubook.github.io/blob/50bd35b2abbecb2e82c766088082a88d3450bc07/src/components/BookBookmark.vue#L105
-            console.log("didn't click on what we expected. Logging target for debug info")
-            console.log(target)
-            return
-        }
-        var paragraphIndexString = target.id.match(/(\d+)/)[0];
-        if (paragraphIndexString == null) {
-            console.log("couldn't get paragraph index from id. Logging target for debug info")
-            console.log(target)
-            return
-        }
-        var paragraphIndex = parseInt(paragraphIndexString);
-
-        var textComponent :TextComponent;
-        for (let i = 0; i < context.state.textComponents.length; i++) {
-            if (context.state.textComponents[i].index == paragraphIndex) {
-                textComponent = context.state.textComponents[i]
-            }
-        }
-        if (textComponent == null) {
-            console.log("something wrong with textComponent, logging paragraphIndex")
-            console.log(paragraphIndexString)
-            console.log(context.state.textComponents)
-        }
-        // TODO remove old bookmark, if it exists
-
-        var range: Range | CaretPosition;
-        var offset: number;
-        var textNode: Node;
-        if (document.caretPositionFromPoint) {    // Firefox
-            range = document.caretPositionFromPoint(payload.e.x,payload.e.y) as CaretPosition;
-            textNode = range.offsetNode;
-            offset = range.offset;
-        } else if (document.caretRangeFromPoint) {     // Chromium-based
-            range = document.caretRangeFromPoint(payload.e.x,payload.e.y) as Range;
-            textNode = range.startContainer;
-            offset = range.startOffset;
-        } else {
-            console.log('unsupported browser')
-            return
-        }
-        var nodeIndex: number = Array.prototype.indexOf.call(target.childNodes, textNode);
-        var bookmark = {
-            paragraph: paragraphIndex,
-            node: nodeIndex,
-            character: offset,
-        }
-        textComponent.content = insertBookmark(textComponent.content, bookmark)
-
-    },
     loadFromFile (context :BookContext, payload :BookFile) {
         return new Promise((resolve) => {
             var reader = new FileReader();
@@ -176,11 +113,12 @@ const mutations = {
             }
         }
         var jisage = 0;
+        var paragraphIndex = 0;
         for (i = metadataEnd + 1; i < state.rawLines.length; i++) {
             // the text props we will pass to the BookParagraph component
             var text :TextComponent = {
                 jisage: jisage,
-                index: i,
+                index: paragraphIndex,
                 content: "",
                 textType: 'BookParagraph',
                 hLevel: 0,
@@ -190,6 +128,7 @@ const mutations = {
             if (content === "") {
                 text.textType = 'BookLineBreak';
                 texts.push(text);
+                paragraphIndex++;
                 continue;
             }
 
@@ -229,30 +168,50 @@ const mutations = {
 
             if (content) {
                 text.content = content
-                texts.push(text)
+                texts.push(text);
+                paragraphIndex++;
             }
         }
         state.textComponents = texts;
     },
 
-    loadBookmark (state :BookState, bookmark :Bookmark) {
-        // rawLines content
-        var content = state.bookmark.content;
+    loadContent (state :BookState, payload :{index:number, content:string}) {
+        var textComponent = state.textComponents[payload.index];
+        if (textComponent != null) {
+            textComponent.content = payload.content;
+        } else {
+            console.log(`index ${payload.index} out of range for state.textComponents`)
+        }
+    },
 
-        // replace the old bookmark with the new bookmark. "state.bookmark.content" is gone
-        state.bookmark = bookmark;
-        for (var i = 0; i < state.textComponents.length; i++) {
-            if (state.textComponents[i].index === bookmark.paragraph) {
-                // if we have rawLines content stored
-                // TODO: this doesn't feel that robust, try considering a cleaner solution
-                if (content) {
-                    state.textComponents[i].content = insertBookmark(content, bookmark);
-                    state.bookmark.content = content;
-                } else {
-                    state.bookmark.content = state.textComponents[i].content
-                    state.textComponents[i].content = insertBookmark(state.textComponents[i].content, bookmark)
-                }
+    removeBookmark (state :BookState) {
+        if (state.bookmark.content != null) {
+            console.log("Attempting to remove bookmark");
+            state.textComponents[state.bookmark.paragraph].content = state.bookmark.content;
+            let emptyBookmark = {paragraph:0,node:0,character:0,content:null};
+            Object.assign(state.bookmark,emptyBookmark)
+        } else {
+            console.log("Bookmark doesn't exist");
+        }
+    },
+
+    loadBookmark (state :BookState, bookmark :Bookmark) {
+        if (state.bookmark.content == null) {
+            console.log("First time loading bookmark")
+            var cleanTextComponent = state.textComponents[bookmark.paragraph]
+            if (cleanTextComponent == null) {
+                console.log(`Bookmark paragraph  ${bookmark.paragraph} out of range`)
+                return
             }
+            var cleanContent = cleanTextComponent.content;
+            cleanTextComponent.content = insertBookmark(cleanContent, bookmark);
+            console.log("Going to set bookmark content to:")
+            console.log(cleanContent)
+            bookmark.content = cleanContent;
+            Object.assign(state.bookmark, bookmark);
+        } else {
+            console.log("Error, bookmark already loaded. Please remove it first")
+            return;
         }
     },
 
