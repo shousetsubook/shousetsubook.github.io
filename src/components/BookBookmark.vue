@@ -7,7 +7,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
-//import { BOOKMARK_CLASS } from '../helpers/bookmark'
+import { bookmarkFromHash, idFromBookmark } from '../helpers/bookmark'
 
 export default Vue.extend({
     name: 'BookBookmark',
@@ -27,6 +27,19 @@ export default Vue.extend({
     },
 
     mounted() {
+        var bookmark = bookmarkFromHash(location.hash);
+        if (bookmark.paragraph != null && (bookmark.paragraph + bookmark.character + bookmark.node > 0)) {
+            this.$store.commit('book/loadBookmark', bookmark);
+            this.$nextTick(function() {
+                var id = idFromBookmark(bookmark);
+                var bookmarkedChar = document.getElementById(id);
+                if (bookmarkedChar != null) {
+                    this.pxPosition = bookmarkedChar.getBoundingClientRect().left;
+                    location.hash = "";
+                    location.hash = id;
+                }
+            });
+        }
         window.addEventListener('mousedown', (e) => {
             var target = e.target as HTMLElement
             if (target == null || target.id == null) {
@@ -76,8 +89,13 @@ export default Vue.extend({
                     node: nodeIndex,
                     character: offset,
                 }
+                location.hash = idFromBookmark(bookmark);
                 this.$store.commit('book/loadBookmark', bookmark);
-                this.pxPosition = window.scrollX + e.x;
+                this.$nextTick(function() {
+                    this.pxPosition = window.scrollX + e.x;
+                })
+                
+
             })
         })
     }

@@ -82,6 +82,5 @@ export {
     Bookmark,
     insertBookmark,
     idFromBookmark,
-    removeBookmark,
     bookmarkFromHash,
 }
