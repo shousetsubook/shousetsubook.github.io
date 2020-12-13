@@ -2,7 +2,7 @@
 <div class="the-book-wrapper">
     <div class="the-book">
         <BookBookmark/>
-        <h1>{{title}}</h1>
+        <h1 id="title">{{title}}</h1>
         <h2>{{author}}</h2>
         <component
             v-bind:key="text.index"
@@ -54,6 +54,11 @@ export default Vue.extend({
         textComponents: function() {
             return this.$store.getters['book/textComponents']
         },
+    },
+
+    updated: function() {
+        console.log('updated in component')
+        this.$store.dispatch('book/updated');
     },
 
 });

@@ -26,7 +26,7 @@ export default Vue.extend({
         }
     },
 
-    mounted() {
+    created() {
         var bookmark = bookmarkFromHash(location.hash);
         if (bookmark.paragraph != null && (bookmark.paragraph + bookmark.character + bookmark.node > 0)) {
             this.$store.commit('book/loadBookmark', bookmark);
@@ -39,7 +39,17 @@ export default Vue.extend({
                     location.hash = id;
                 }
             });
+        } else {
+            // the next animation frame takes a really long time for long books, so use this to render it when the page repaints
+            requestAnimationFrame(function() {
+                console.log("alrihgt")
+                var title = document.getElementById("title");
+                title!.scrollIntoView();
+            })
         }
+    },
+
+    mounted() {
         window.addEventListener('mousedown', (e) => {
             var target = e.target as HTMLElement
             if (target == null || target.id == null) {

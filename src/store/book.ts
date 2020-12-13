@@ -64,6 +64,9 @@ const getters = {
 
 // actions
 const actions = {
+    updated () {
+        console.log('updated')
+    },
     loadFromFile (context :BookContext, payload :BookFile) {
         return new Promise((resolve) => {
             var reader = new FileReader();
