@@ -5,7 +5,7 @@
     @drop.stop.prevent="onFileDrop"
     >
     <div class="welcome-wrapper">
-        <h1 v-if="!isLoaded" class="welcome">Drag and drop unzipped Aozora Bunko text file</h1>
+        <h1 v-if="!isLoaded" class="welcome">{{message}}</h1>
     </div>
     <TheBook v-if="isLoaded"/>
     </div>
@@ -23,6 +23,7 @@ export default Vue.extend({
     data() {
         return {
             isDraggingFile: false,
+            message:"Drag and drop unzipped Aozora Bunko text file",
         }
     },
 
@@ -39,6 +40,7 @@ export default Vue.extend({
         },
         onFileDrop(e :DragEvent) {
             this.isDraggingFile = false;
+            this.message = "loading"
             if (e.dataTransfer) {
                 for (var i = 0; i < e.dataTransfer.files.length; i++) {
                     var file = e.dataTransfer.files[i];

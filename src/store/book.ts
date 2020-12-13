@@ -186,18 +186,16 @@ const mutations = {
 
     removeBookmark (state :BookState) {
         if (state.bookmark.content != null) {
-            console.log("Attempting to remove bookmark");
             state.textComponents[state.bookmark.paragraph].content = state.bookmark.content;
             let emptyBookmark = {paragraph:0,node:0,character:0,content:null};
             Object.assign(state.bookmark,emptyBookmark)
         } else {
-            console.log("Bookmark doesn't exist");
+            // bookmark doesn't exist
         }
     },
 
     loadBookmark (state :BookState, bookmark :Bookmark) {
         if (state.bookmark.content == null) {
-            console.log("First time loading bookmark")
             var cleanTextComponent = state.textComponents[bookmark.paragraph]
             if (cleanTextComponent == null) {
                 console.log(`Bookmark paragraph  ${bookmark.paragraph} out of range`)
@@ -205,8 +203,6 @@ const mutations = {
             }
             var cleanContent = cleanTextComponent.content;
             cleanTextComponent.content = insertBookmark(cleanContent, bookmark);
-            console.log("Going to set bookmark content to:")
-            console.log(cleanContent)
             bookmark.content = cleanContent;
             Object.assign(state.bookmark, bookmark);
         } else {

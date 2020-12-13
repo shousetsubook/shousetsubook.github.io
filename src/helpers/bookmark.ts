@@ -11,6 +11,30 @@ const idFromBookmark = (bookmark :Bookmark) :string => {
     return `p${bookmark.paragraph}n${bookmark.node}c${bookmark.character}`;
 }
 
+const bookmarkFromHash = (hash :string) :Bookmark => {
+    var bookmark = {
+        paragraph:0,
+        node:0,
+        character:0,
+    }
+    var indices = hash.match(/p(\d+)n(\d+)c(\d+)/)
+    if (indices != null) {
+        var paragraph = parseInt(indices[1]);
+        var node = parseInt(indices[2]);
+        var character = parseInt(indices[3]);
+        if (!isNaN(paragraph)) {
+            bookmark.paragraph = paragraph;
+        }
+        if (!isNaN(node)) {
+            bookmark.node = node;
+        }
+        if (!isNaN(character)) {
+            bookmark.character = character;
+        }
+    }
+    return bookmark;
+}
+
 const removeBookmark = (content :string) :string => {
     // create a Template to parse easily
     var template = document.createElement('template');
@@ -24,7 +48,6 @@ const removeBookmark = (content :string) :string => {
         // the inner nodes will still be fragmented so this should combine them
         var temp = template.innerHTML;
         template.innerHTML = temp;
-        console.log(template);
         return template.innerHTML;
     } else {
         console.log("Couldn't remove bookmark")
@@ -81,4 +104,5 @@ export {
     insertBookmark,
     idFromBookmark,
     removeBookmark,
+    bookmarkFromHash,
 }

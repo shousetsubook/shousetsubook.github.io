@@ -27,7 +27,7 @@ export default Vue.extend({
     },
 
     mounted() {
-        window.addEventListener('click', (e) => {
+        window.addEventListener('mousedown', (e) => {
             var target = e.target as HTMLElement
             if (target == null || target.id == null) {
                 console.log('Invalid target. Logging event for debugging')
@@ -53,7 +53,6 @@ export default Vue.extend({
             }
             var paragraphIndex = parseInt(paragraphIndexMatch[0]);
 
-            // TODO remove old bookmark, if it exists
             this.$store.commit('book/removeBookmark');
             this.$nextTick(function() {
                 var range: Range | CaretPosition;
@@ -78,6 +77,7 @@ export default Vue.extend({
                     character: offset,
                 }
                 this.$store.commit('book/loadBookmark', bookmark);
+                this.pxPosition = window.scrollX + e.x;
             })
         })
     }
