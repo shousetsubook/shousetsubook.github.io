@@ -11,6 +11,7 @@ export default Vue.extend({
             return createElement(
                 'h' + this.text.hLevel,
                 {
+                    id: this.text.content,
                     class: {
                         'header': true,
                         'text-component': true,

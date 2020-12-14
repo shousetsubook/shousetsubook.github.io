@@ -40,6 +40,10 @@ const getters = {
         return state.bookmark
     },
 
+    isBookmarked: (state :BookState) :boolean => {
+        return state.bookmark.content != null;
+    },
+
     isLoaded: (state :BookState) :boolean => (
         state.rawLines.length > 0
     ),

@@ -44,18 +44,25 @@ const insertBookmark = (content :string, bookmark: Bookmark) :string => {
     var bookmarkNode = template.content.childNodes[bookmark.node];
     if (bookmarkNode == null || bookmarkNode.textContent == null) {
         console.log(`Invalid bookmark. Node with index ${bookmark.node} does not exist`);
+        console.log(content);
         return content;
     }
-
-    // slice the node to get the specific chracter that bookmark points to
-    var sliceUntilBookmark = bookmarkNode.textContent.slice(0, bookmark.character);
     var charAtBookmark = bookmarkNode.textContent[bookmark.character];
+    if (charAtBookmark == null) {
+        // try the previous character
+        charAtBookmark = bookmarkNode.textContent[bookmark.character-1];
+        if (charAtBookmark == null) {
+            console.log(`Invalid bookmark. Character with index ${bookmark.character} does not exist`);
+            return content;
+        } else {
+            bookmark.character--;
+        }
+    }
+
+    // slice the node at the bookmark
+    var sliceUntilBookmark = bookmarkNode.textContent.slice(0, bookmark.character);
     var sliceAfterBookmark = bookmarkNode.textContent.slice(bookmark.character+1);
 
-    if (charAtBookmark == null) {
-        console.log(`Invalid bookmark. Character with index ${bookmark.character} does not exist`);
-        return content;
-    }
 
     var newBookmark = document.createElement('span') as HTMLElement;
     newBookmark.appendChild(document.createTextNode(charAtBookmark));

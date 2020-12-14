@@ -22,6 +22,7 @@ export default Vue.extend({
         bookmarkStyle() :Partial<CSSStyleDeclaration> {
             return {
                 left: this.pxPosition + 'px',
+                visibility: this.$store.getters['book/isBookmarked'] ? 'visible' : 'hidden',
             }
         }
     },
@@ -41,29 +42,35 @@ export default Vue.extend({
             });
         } else {
             // the next animation frame takes a really long time for long books, so use this to render it when the page repaints
-            requestAnimationFrame(function() {
-                console.log("alrihgt")
+            requestAnimationFrame(() => {
                 var title = document.getElementById("title");
-                title!.scrollIntoView();
+                if (title == null) {
+                    console.log("Book doesn't have a title for some reason...")
+                } else {
+                    title.scrollIntoView();
+                    this.pxPosition = window.scrollX + title.getBoundingClientRect().left;
+                }
             })
         }
     },
 
     mounted() {
         window.addEventListener('mousedown', (e) => {
-            var target = e.target as HTMLElement
-            if (target == null || target.id == null) {
-                console.log('Invalid target. Logging event for debugging')
-                console.log(e)
-                return 
+            var target = e.target as HTMLElement;
+            var originalTarget = target;
+            var bubble = target;
+            while (bubble.parentElement != null) {
+                if (bubble.classList.contains('paragraph')) {
+                    break;
+                }
+                bubble = bubble.parentElement;
             }
-            if (!target.classList.contains('paragraph')) {
-                // can only bookmark when clicking on the text. Todo, get nearest paragraph of click
+            if (bubble.parentElement == null) {
+                // target not a bookmarkable element, or any of its ancestors
                 return
             }
+            target = bubble;
             if (!target.id.startsWith('BookParagraph')) {
-                // TODO: try bubbling up before just exiting, could have clicked on a child node
-                // https://github.com/shousetsubook/shousetsubook.github.io/blob/50bd35b2abbecb2e82c766088082a88d3450bc07/src/components/BookBookmark.vue#L105
                 console.log("didn't click on what we expected. Logging target for debug info")
                 console.log(target)
                 return
@@ -93,7 +100,10 @@ export default Vue.extend({
                     console.log('unsupported browser')
                     return
                 }
-                var nodeIndex: number = Array.prototype.indexOf.call(target.childNodes, textNode);
+                var nodeIndex: number = Array.prototype.indexOf.call(originalTarget.childNodes, textNode);
+                if (nodeIndex == -1) {
+                    return;
+                }
                 var bookmark = {
                     paragraph: paragraphIndex,
                     node: nodeIndex,
