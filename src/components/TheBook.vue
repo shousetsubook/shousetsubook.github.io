@@ -56,11 +56,6 @@ export default Vue.extend({
         },
     },
 
-    updated: function() {
-        console.log('updated in component')
-        this.$store.dispatch('book/updated');
-    },
-
 });
 </script>
 

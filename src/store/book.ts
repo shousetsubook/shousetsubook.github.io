@@ -40,10 +40,6 @@ const getters = {
         return state.bookmark
     },
 
-    isBookmarked: (state :BookState) :boolean => {
-        return state.bookmark.content != null;
-    },
-
     isLoaded: (state :BookState) :boolean => (
         state.rawLines.length > 0
     ),
@@ -68,9 +64,6 @@ const getters = {
 
 // actions
 const actions = {
-    updated () {
-        console.log('updated')
-    },
     loadFromFile (context :BookContext, payload :BookFile) {
         return new Promise((resolve) => {
             var reader = new FileReader();
@@ -187,7 +180,7 @@ const mutations = {
         if (textComponent != null) {
             textComponent.content = payload.content;
         } else {
-            console.log(`index ${payload.index} out of range for state.textComponents`)
+            console.error(`index ${payload.index} out of range for state.textComponents`)
         }
     },
 
@@ -205,7 +198,7 @@ const mutations = {
         if (state.bookmark.content == null) {
             var cleanTextComponent = state.textComponents[bookmark.paragraph]
             if (cleanTextComponent == null) {
-                console.log(`Bookmark paragraph  ${bookmark.paragraph} out of range`)
+                console.error(`Bookmark paragraph  ${bookmark.paragraph} out of range`)
                 return
             }
             var cleanContent = cleanTextComponent.content;
@@ -213,7 +206,7 @@ const mutations = {
             bookmark.content = cleanContent;
             Object.assign(state.bookmark, bookmark);
         } else {
-            console.log("Error, bookmark already loaded. Please remove it first")
+            console.error("Error, bookmark already loaded. Please remove it first")
             return;
         }
     },

@@ -22,7 +22,6 @@ export default Vue.extend({
         bookmarkStyle() :Partial<CSSStyleDeclaration> {
             return {
                 left: this.pxPosition + 'px',
-                visibility: this.$store.getters['book/isBookmarked'] ? 'visible' : 'hidden',
             }
         }
     },
@@ -45,7 +44,7 @@ export default Vue.extend({
             requestAnimationFrame(() => {
                 var title = document.getElementById("title");
                 if (title == null) {
-                    console.log("Book doesn't have a title for some reason...")
+                    console.error("Book doesn't have a title for some reason...")
                 } else {
                     title.scrollIntoView();
                     this.pxPosition = window.scrollX + title.getBoundingClientRect().left;
@@ -57,34 +56,12 @@ export default Vue.extend({
     mounted() {
         window.addEventListener('mousedown', (e) => {
             var target = e.target as HTMLElement;
-            var originalTarget = target;
-            var bubble = target;
-            while (bubble.parentElement != null) {
-                if (bubble.classList.contains('paragraph')) {
-                    break;
-                }
-                bubble = bubble.parentElement;
+            switch (target.tagName) {
+                case 'HTML': case 'RT': case null:
+                    return;
             }
-            if (bubble.parentElement == null) {
-                // target not a bookmarkable element, or any of its ancestors
-                return
-            }
-            target = bubble;
-            if (!target.id.startsWith('BookParagraph')) {
-                console.log("didn't click on what we expected. Logging target for debug info")
-                console.log(target)
-                return
-            }
-            var paragraphIndexMatch = target.id.match(/(\d+)/);
-            if (paragraphIndexMatch == null) {
-                console.log("couldn't get paragraph index from id. Logging target for debug info")
-                console.log(target)
-                return
-            }
-            var paragraphIndex = parseInt(paragraphIndexMatch[0]);
-
             this.$store.commit('book/removeBookmark');
-            this.$nextTick(function() {
+            requestAnimationFrame(() => {
                 var range: Range | CaretPosition;
                 var offset: number;
                 var textNode: Node;
@@ -97,13 +74,43 @@ export default Vue.extend({
                     textNode = range.startContainer;
                     offset = range.startOffset;
                 } else {
-                    console.log('unsupported browser')
+                    console.error('unsupported browser')
                     return
                 }
-                var nodeIndex: number = Array.prototype.indexOf.call(originalTarget.childNodes, textNode);
+                var target = textNode;
+                var ancestry :Array<Node | HTMLElement> = [];
+                ancestry.push(target);
+                var bubble = target;
+                while (bubble.parentElement != null) {
+                    if (bubble instanceof HTMLElement && bubble.id.startsWith('BookParagraph-')) {
+                        break;
+                    }
+                    ancestry.push(bubble.parentElement);
+                    bubble = bubble.parentElement;
+                }
+                if (bubble.parentElement == null) {
+                    // target not a bookmarkable element, or any of its ancestors
+                    return
+                }
+                var nodeIndex = -1;
+                for (let i = 0; i < ancestry.length; i++) {
+                    let search: number = Array.prototype.indexOf.call(bubble.childNodes, ancestry[i]);
+                    if (search != -1) {
+                        nodeIndex = search;
+                        break;
+                    }
+                }
                 if (nodeIndex == -1) {
+                    console.error("node not found")
                     return;
                 }
+                var paragraphIndexMatch = (bubble as HTMLElement).id.match(/(\d+)/);
+                if (paragraphIndexMatch == null) {
+                    console.error("couldn't get paragraph index from id. Logging target for debug info")
+                    return
+                }
+                var paragraphIndex = parseInt(paragraphIndexMatch[0]);
+
                 var bookmark = {
                     paragraph: paragraphIndex,
                     node: nodeIndex,
@@ -111,11 +118,7 @@ export default Vue.extend({
                 }
                 location.hash = idFromBookmark(bookmark);
                 this.$store.commit('book/loadBookmark', bookmark);
-                this.$nextTick(function() {
-                    this.pxPosition = window.scrollX + e.x;
-                })
-                
-
+                this.pxPosition = window.scrollX + e.x;
             })
         })
     }

@@ -34,7 +34,7 @@ const midasi = function(text :string) {
             case "小":
                 return '<h3>' + p1 + '</h3>';
         }
-        console.log('Error replacing midasi pattern. Text: ' + text)
+        console.error('Error replacing midasi pattern. Text: ' + text)
         return ''
     })
 }

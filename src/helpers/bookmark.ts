@@ -42,9 +42,14 @@ const insertBookmark = (content :string, bookmark: Bookmark) :string => {
 
     // get the textNode that bookmark points to
     var bookmarkNode = template.content.childNodes[bookmark.node];
+    
+    // TODO: handle case with more than 1 child
+    if (bookmarkNode.hasChildNodes()) {
+        bookmarkNode = bookmarkNode.childNodes[0];
+    }
     if (bookmarkNode == null || bookmarkNode.textContent == null) {
-        console.log(`Invalid bookmark. Node with index ${bookmark.node} does not exist`);
-        console.log(content);
+        console.error(`Invalid bookmark. Node with index ${bookmark.node} does not exist`);
+        console.error(content);
         return content;
     }
     var charAtBookmark = bookmarkNode.textContent[bookmark.character];
@@ -52,7 +57,7 @@ const insertBookmark = (content :string, bookmark: Bookmark) :string => {
         // try the previous character
         charAtBookmark = bookmarkNode.textContent[bookmark.character-1];
         if (charAtBookmark == null) {
-            console.log(`Invalid bookmark. Character with index ${bookmark.character} does not exist`);
+            console.error(`Invalid bookmark. Character with index ${bookmark.character} does not exist`);
             return content;
         } else {
             bookmark.character--;
@@ -62,7 +67,6 @@ const insertBookmark = (content :string, bookmark: Bookmark) :string => {
     // slice the node at the bookmark
     var sliceUntilBookmark = bookmarkNode.textContent.slice(0, bookmark.character);
     var sliceAfterBookmark = bookmarkNode.textContent.slice(bookmark.character+1);
-
 
     var newBookmark = document.createElement('span') as HTMLElement;
     newBookmark.appendChild(document.createTextNode(charAtBookmark));
@@ -80,7 +84,8 @@ const insertBookmark = (content :string, bookmark: Bookmark) :string => {
     if (sliceAfterBookmark != null) {
         bookmarkFragment.appendChild(document.createTextNode(sliceAfterBookmark));
     }
-    template.content.replaceChild(bookmarkFragment, bookmarkNode);
+    // we know this isn't null because bookmarkNode is a child node
+    bookmarkNode.parentNode!.replaceChild(bookmarkFragment, bookmarkNode);
     return template.innerHTML;
 }
 
