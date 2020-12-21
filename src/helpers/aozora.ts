@@ -20,9 +20,8 @@ const boutenify = function(text :string) {
     return text.replace(bouten, '<span class="sesame-vertical">$1</span>')
 }
 const kutenkara = function(text :string) {
-    // TODO: actually convert the jis kuten codes
-    // TODO: non-kanji and unicode
     var jiskuten = /※［＃(?:「(.+?)」、)?第(\d+?)水準(\d+?)-(\d+?)-(\d+?)］/g
+    // logic for kutenToBytes here: https://ja.wikipedia.org/wiki/Shift_JIS-2004
     const kutenToBytes = function(m :number, k :number, t :number) :number {
         var s1, s2 :number
         if (m == 1 && 1 <= k && k <= 62) {
@@ -55,11 +54,13 @@ const kutenkara = function(text :string) {
             s2 = NaN;
         }
         if (isNaN(s1) || isNaN(s2)) {
-            return 0
+            console.error("Invalid kuten code")
+            return 0x81A6 //※: this is Aozora's fill-in character for non JIS X 0208 kanji
         } else {
             console.debug(`s1: ${s1} s2: ${s2}`);
             console.debug(`h1: ${s1.toString(16)} h2: ${s2.toString(16)}`);
             console.debug(`${((s1 << 8) + s2).toString(16)}`)
+            // assuming big endian is fine because the generated mapping also uses big endian
             return (s1 << 8) + s2;
         }
     }
