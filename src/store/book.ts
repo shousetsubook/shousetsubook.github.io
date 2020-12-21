@@ -65,7 +65,7 @@ const getters = {
 // actions
 const actions = {
     loadFromFile (context :BookContext, payload :BookFile) {
-        return new Promise((resolve) => {
+        return new Promise<void>((resolve) => {
             var reader = new FileReader();
             reader.onload = () => {
                 var rawString = reader.result as string;
