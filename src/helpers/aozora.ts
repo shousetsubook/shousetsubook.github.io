@@ -21,7 +21,7 @@ const boutenify = function(text :string) {
 }
 const kutenkara = function(text :string) {
     var jiskuten = /※［＃(?:「(.+?)」、)?第(\d+?)水準(\d+?)-(\d+?)-(\d+?)］/g
-    // logic for kutenToBytes here: https://ja.wikipedia.org/wiki/Shift_JIS-2004
+    // logic for kutenToBytes here: https://ja.wikipedia.org/wiki/Shift_JIS-2004#%E8%A8%88%E7%AE%97%E6%96%B9%E6%B3%95
     const kutenToBytes = function(m :number, k :number, t :number) :number {
         var s1, s2 :number
         if (m == 1 && 1 <= k && k <= 62) {
