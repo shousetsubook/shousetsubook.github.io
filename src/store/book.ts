@@ -67,13 +67,6 @@ const actions = {
     loadFromFile (context :BookContext, payload :BookFile) {
         return new Promise<void>((resolve) => {
             var reader = new FileReader();
-            if (payload.file.size < 1000) {
-                reader.onload = () => {
-                    console.log(reader.result);
-                };
-                reader.readAsArrayBuffer(payload.file);
-                return;
-            }
             reader.onload = () => {
                 var rawString = reader.result as string;
                 context.commit('loadRawLines', rawString.split(/\r?\n/))
