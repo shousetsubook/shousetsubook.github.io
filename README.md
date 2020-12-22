@@ -20,9 +20,9 @@ For bookmarking, click anywhere on the text to create a bookmark at that charact
 
 ## Roadmap
 - render all aozora bunko formatting. Todo:
-    - accents
     - non-JIS kanji
     - subscript/superscript
+    - specific 横書き
 - basic navigation (chapters, table of contents)
 - themes/fonts
 - toggleable 縦書き or 横書き
