@@ -23,10 +23,14 @@ export default Vue.extend({
 });
 </script>
 
-<style scoped>
+<style>
     .paragraph {
         text-align:justify;
         word-wrap:break-word;
         background-color:rgb(241, 237, 212);
+    }
+
+    .latin-long {
+        text-orientation: sideways;
     }
 </style>

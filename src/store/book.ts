@@ -1,4 +1,4 @@
-import { todo, rubify, midasi, boutenify, kutenkara } from '../helpers/aozora'
+import { aozora } from '../helpers/aozora'
 import { Bookmark, insertBookmark } from '../helpers/bookmark'
 
 export interface TextComponent {
@@ -155,11 +155,7 @@ const mutations = {
             }
 
             // next, do things like simple search and replace
-            content = kutenkara(content)
-            content = rubify(content)
-            content = boutenify(content)
-            content = midasi(content)
-            content = todo(content)
+            content = aozora(content)
 
             // add bookmark if available
             if (state.bookmark.paragraph === i) {
