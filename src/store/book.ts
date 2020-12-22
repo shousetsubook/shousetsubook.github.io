@@ -133,7 +133,7 @@ const mutations = {
             }
 
             // first, check if it's a formatting line
-            var sagepattern = /^［＃(ここから)?([０-９]+?)字下げ］/
+            var sagepattern = /^［＃(ここから)?([０-９]+?)字下げ.*］/
             var fullwidth = content.match(sagepattern)
             if (fullwidth) {
                 var jisageString = String.fromCharCode(fullwidth[2].charCodeAt(0) - 0xFEE0)

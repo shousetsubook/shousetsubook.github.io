@@ -33,4 +33,5 @@ export default Vue.extend({
     .latin-long {
         text-orientation: sideways;
     }
+
 </style>

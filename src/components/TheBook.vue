@@ -72,7 +72,7 @@ export default Vue.extend({
     -ms-writing-mode: tb-rl;
     writing-mode: tb-rl;
     writing-mode: vertical-rl;
-    text-orientation: upright;
+    text-orientation: mixed;
     font-size:18px;
     height: 80vh;
 }
