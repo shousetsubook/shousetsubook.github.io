@@ -20,7 +20,7 @@ const boutenify = function(text :string) {
     return text.replace(bouten, '<span class="sesame-vertical">$1</span>')
 }
 const kutenkara = function(text :string) {
-    var jiskuten = /※［＃(?:「(.+?)」、)?第(\d+?)水準(\d+?)-(\d+?)-(\d+?)］/g
+    var jiskuten = /※［＃(.*)、?(?:第(\d+?)水準)?(\d+?)-(\d+?)-(\d+?)］/g
     // logic for kutenToBytes here: https://ja.wikipedia.org/wiki/Shift_JIS-2004#%E8%A8%88%E7%AE%97%E6%96%B9%E6%B3%95
     const kutenToBytes = function(m :number, k :number, t :number) :number {
         var s1, s2 :number
@@ -64,10 +64,10 @@ const kutenkara = function(text :string) {
             return (s1 << 8) + s2;
         }
     }
-    return text.replace(jiskuten, function(match, _p1, _p2, p3, p4, p5) {
+    return text.replace(jiskuten, function(match, _comment, _suijun, m, k, t) {
         console.debug(`Matched ${match}`)
-        console.debug(`p3: ${p3}, p4: ${p4}, p5: ${p5}`)
-        const bytes = kutenToBytes(parseInt(p3),parseInt(p4),parseInt(p5));
+        console.debug(`m: ${m}, k: ${k}, t: ${t}`)
+        const bytes = kutenToBytes(parseInt(m),parseInt(k),parseInt(t));
         const char = shiftJIS[bytes];
         console.debug(char)
         return char 
