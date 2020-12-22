@@ -23,6 +23,7 @@ For bookmarking, click anywhere on the text to create a bookmark at that charact
     - accents
     - non-JIS kanji
     - subscript/superscript
+- basic navigation (chapters, table of contents)
 - themes/fonts
 - toggleable 縦書き or 横書き
 
