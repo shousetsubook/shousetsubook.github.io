@@ -91,6 +91,16 @@ const boutenify = function(text :string) :string {
     return text.replace(bouten, '<span class="sesame-vertical">$1</span>')
 };
 
+const superscriptify = function(text :string) :string {
+    var superscript = /(.+?)［＃「\1」は上付き小文字］/g;
+    return text.replace(superscript, '<sup>$1</sup>')
+};
+
+const subscriptify = function(text :string) :string {
+    var subscript = /(.+?)［＃「\1」は下付き小文字］/g;
+    return text.replace(subscript, '<sub>$1</sub>')
+};
+
 const kutenkara = function(text :string) :string {
     var jiskuten = /※［＃(.*)、?(?:第(\d+?)水準)?(\d+?)-(\d+?)-(\d+?)］/g
     // logic for kutenToBytes here: https://ja.wikipedia.org/wiki/Shift_JIS-2004#%E8%A8%88%E7%AE%97%E6%96%B9%E6%B3%95
@@ -163,21 +173,25 @@ const midasi = function(text :string) :string {
 };
 
 const aozora = function(text :string) :string {
-    text = kutenkara(text)
-    text = rubify(text)
-    text = boutenify(text)
-    text = midasi(text)
     text = accentify(text)
+    text = boutenify(text)
+    text = kutenkara(text)
+    text = midasi(text)
+    text = rubify(text)
+    text = subscriptify(text)
+    text = superscriptify(text)
     text = todo(text)
     return text
 }
 
 export {
-    aozora,
-    todo,
     accentify,
-    rubify,
-    midasi,
-    kutenkara,
+    aozora,
     boutenify,
+    kutenkara,
+    midasi,
+    rubify,
+    subscriptify,
+    superscriptify,
+    todo,
 }

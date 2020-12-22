@@ -21,7 +21,6 @@ For bookmarking, click anywhere on the text to create a bookmark at that charact
 ## Roadmap
 - render all aozora bunko formatting. Todo:
     - non-JIS kanji
-    - subscript/superscript
     - specific 横書き
 - basic navigation (chapters, table of contents)
 - themes/fonts
