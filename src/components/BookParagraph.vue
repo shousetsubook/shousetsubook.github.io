@@ -30,6 +30,13 @@ export default Vue.extend({
         background-color:rgb(241, 237, 212);
     }
 
+
+    .sesame-vertical {
+        font-style: normal;
+        padding: 0 7px;
+        background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACIAAAASCAYAAAA+PQxvAAAASklEQVRIie3RMQ2AQBQFwQEBFChAED7OBgYQhAV6HCCE6gRQfUjeKNhkiYj4pwEb9uIOC07cODBXxoxYcaFVhnSTDyzqStdEvPIAUCgF359HwAgAAAAASUVORK5CYII=') repeat-y;
+    }
+
     .latin-long {
         text-orientation: sideways;
     }
