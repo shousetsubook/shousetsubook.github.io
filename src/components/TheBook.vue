@@ -1,5 +1,5 @@
 <template>
-<div class="the-book-wrapper" v-bind:class="cursor ? cursorClass : ''">
+<div class="the-book-wrapper">
     <div class="the-book">
         <BookBookmark/>
         <h1 id="title">{{title}}</h1>
@@ -21,19 +21,7 @@ import BookParagraph from './BookParagraph.vue'
 import BookHeader from './BookHeader.vue'
 import BookLineBreak from './BookLineBreak.vue'
 import Vue from 'vue'
-import { TextComponent } from '@/store/book'
-
-
 export default Vue.extend({
-    data: function() {
-        return {
-            cursor: false,
-            cursorClass: 'cursor',
-            position: 0,
-            encoding: 'shift-jis',
-        }
-    },
-
     name: 'TheBook',
 
     components: {
@@ -43,33 +31,27 @@ export default Vue.extend({
         BookLineBreak: BookLineBreak,
     },
 
-    created: function() :void {
-        window.addEventListener('keypress', (e) :void => {
-            if (e.code == 'KeyM') {
-                console.log('m pressed')
-                this.cursor = !this.cursor
-                console.log(this.cursor)
-            }
-        });
+    data: function() {
+        return {
+            position: 0,
+            encoding: 'shift-jis',
+        }
+    },
+
+    methods: {
     },
 
     computed: {
-        cursorStyle(): Partial<CSSStyleDeclaration> {
-            if (this.cursor) {
-                return {cursor: 'url("../assets/cursor.png") 16 16, auto'}
-            }
-            return {cursor: 'url(cursor.png)'}
-        },
-        isLoaded: function() :boolean {
+        isLoaded: function() {
             return this.$store.getters['book/isLoaded']
         },
-        title: function () :string {
+        title: function () {
             return this.$store.getters['book/title']
         },
-        author: function() :string {
+        author: function() {
             return this.$store.getters['book/author']
         },
-        textComponents: function() :Array<TextComponent> {
+        textComponents: function() {
             return this.$store.getters['book/textComponents']
         },
     },
@@ -84,10 +66,6 @@ export default Vue.extend({
     width: 100%;
     height: 100%;
     position:absolute;
-}
-
-.cursor {
-    cursor: url("../assets/cursor.png") 16 16, auto;
 }
 
 .the-book {
