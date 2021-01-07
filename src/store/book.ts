@@ -1,4 +1,4 @@
-import { aozora } from '../helpers/aozora'
+import { aozora, rubify } from '../helpers/aozora'
 import { Bookmark, insertBookmark } from '../helpers/bookmark'
 
 export interface TextComponent {
@@ -45,11 +45,11 @@ const getters = {
     ),
 
     title: (state :BookState) :string => (
-        state.rawLines.length >= 2 ? state.rawLines[0] : ''
+        state.rawLines.length >= 2 ? rubify(state.rawLines[0]) : ''
     ),
 
     author: (state :BookState) :string => (
-        state.rawLines.length >= 2 ? state.rawLines[1] : ''
+        state.rawLines.length >= 2 ? rubify(state.rawLines[1]) : ''
     ),
 
     rawLines: (state :BookState) :Array<string> => {
