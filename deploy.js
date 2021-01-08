@@ -9,6 +9,7 @@ var shousetsubook = simpleGit();
 shousetsubook.fetch('--all').status(onStatus).getRemotes(true,onGetRemotes).revparse('HEAD', onRevparse);
 var gitConditions = [];
 function onStatus (err, statusResult) {
+    console.log(statusResult)
     if (!statusResult.isClean()) {
         gitConditions.push('working directory is not clean');
     }
@@ -18,10 +19,7 @@ function onStatus (err, statusResult) {
     if (statusResult.tracking !== "origin/main") {
         gitConditions.push('current branch is not tracking origin/main');
     }
-    if (statusResult.ahead !== 0 && statusResult.behind !== 0) {
-        gitConditions.push('current branch is not up-to-date with origin/main');
-    }
-    if (statusResult.ahead !== 0 && statusResult.behind !== 0) {
+    if (statusResult.ahead !== 0 || statusResult.behind !== 0) {
         gitConditions.push('current branch is not up-to-date with origin/main');
     }
 
@@ -42,6 +40,7 @@ function onRevparse (err, commit) {
         console.log('Could not deploy because ' + gitConditions.join(', '));
         exit(1);
     }
+    exit(0);
     child_process.execSync('npm run build',{stdio:[0,1,2]});
     console.log('Publishing to gh-pages branch with message: ' + commit)
     ghpages.publish('dist', {
